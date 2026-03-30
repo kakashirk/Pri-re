@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Salati — Horaires de Prière</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a3a2a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ───── HEADER ───── -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">☽</span>
+      <span class="logo-text">Salati</span>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-section="accueil">Accueil</button>
+      <button class="nav-btn" data-section="horaires">Horaires</button>
+      <button class="nav-btn" data-section="sourates">Sourates</button>
+      <button class="nav-btn" data-section="coran">Coran</button>
+    </nav>
+    <button class="notif-btn" id="notifBtn" title="Activer les notifications">
+      <span class="notif-icon">🔔</span>
+    </button>
+  </div>
+</header>
+
+<!-- ───── SECTION ACCUEIL ───── -->
+<section class="section active" id="accueil">
+  <div class="hero">
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+      <p class="bismillah amiri">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+      <h1 class="hero-title">Horaires de Prière</h1>
+      <p class="hero-location" id="heroLocation">Localisation en cours…</p>
+
+      <!-- Prochaine prière -->
+      <div class="next-prayer-card" id="nextPrayerCard">
+        <div class="next-label">Prochaine prière</div>
+        <div class="next-name" id="nextPrayerName">—</div>
+        <div class="next-time" id="nextPrayerTime">—</div>
+        <div class="next-countdown" id="nextCountdown">—</div>
+      </div>
+
+      <!-- Prières du jour (résumé) -->
+      <div class="today-prayers" id="todayPrayers">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── SECTION HORAIRES ───── -->
+<section class="section" id="horaires">
+  <div class="page-container">
+    <div class="page-header">
+      <h2>Horaires du jour</h2>
+      <p class="page-sub" id="horairesDate">—</p>
+    </div>
+
+    <div class="location-bar">
+      <span class="loc-icon">📍</span>
+      <span id="horairesLocation">Localisation en cours…</span>
+      <button class="refresh-btn" id="refreshBtn" title="Actualiser">↻</button>
+    </div>
+
+    <div class="prayer-list" id="prayerList">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="adhan-info">
+      <h3>Méthode de calcul</h3>
+      <p>Calcul basé sur la méthode de l'Union des organisations islamiques de France (UOIF / MWL).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ───── SECTION SOURATES ───── -->
+<section class="section" id="sourates">
+  <div class="page-container">
+    <div class="page-header">
+      <h2>Sourates recommandées</h2>
+      <p class="page-sub">Sourates à réciter selon les moments de prière</p>
+    </div>
+
+    <div class="prayer-tabs" id="prayerTabs">
+      <button class="ptab active" data-prayer="fajr">Fajr</button>
+      <button class="ptab" data-prayer="dhuhr">Dhuhr</button>
+      <button class="ptab" data-prayer="asr">Asr</button>
+      <button class="ptab" data-prayer="maghrib">Maghrib</button>
+      <button class="ptab" data-prayer="isha">Isha</button>
+    </div>
+
+    <div class="suratas-grid" id="suratasGrid">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Lecteur de sourate -->
+    <div class="surata-reader" id="surataReader" style="display:none">
+      <div class="reader-header">
+        <button class="back-btn" id="backBtn">← Retour</button>
+        <div class="reader-title">
+          <h3 id="readerNameFr">—</h3>
+          <p class="amiri reader-arabic" id="readerNameAr">—</p>
+        </div>
+      </div>
+      <div class="reader-content" id="readerContent">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── SECTION CORAN ───── -->
+<section class="section" id="coran">
+  <div class="page-container">
+    <div class="page-header">
+      <h2>Le Saint Coran</h2>
+      <p class="page-sub">Arabe · Traduction française</p>
+    </div>
+
+    <div class="quran-search">
+      <input type="search" id="surahSearch" placeholder="Rechercher une sourate…" />
+    </div>
+
+    <div class="surah-list" id="surahList">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Lecteur Coran -->
+    <div class="quran-reader" id="quranReader" style="display:none">
+      <div class="reader-header">
+        <button class="back-btn" id="quranBackBtn">← Retour</button>
+        <div class="reader-title">
+          <h3 id="quranSurahNameFr">—</h3>
+          <p class="amiri reader-arabic" id="quranSurahNameAr">—</p>
+        </div>
+      </div>
+      <div class="ayah-container" id="ayahContainer">
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───── TOAST ───── -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
