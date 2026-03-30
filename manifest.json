@@ -1,0 +1,21 @@
+{
+  "name": "Salati — Horaires de Prière",
+  "short_name": "Salati",
+  "description": "Horaires de prière, notifications, Coran arabe-français",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a3a2a",
+  "theme_color": "#1a3a2a",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%231a3a2a' rx='32'/><text y='140' x='96' font-size='110' text-anchor='middle' fill='%23c9a84c'>☽</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "screenshots": []
+}

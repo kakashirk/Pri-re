@@ -598,6 +598,7 @@ async function loadPrayerTimes() {
 
     renderAccueil();
     renderHoraires();
+    syncPrayersToSW(timings);
 
     // Re-start notification checker now that we have times
     if (state.notificationsEnabled) startNotificationChecker();
@@ -611,6 +612,7 @@ async function loadPrayerTimes() {
       state.cityName = 'Paris (par défaut)';
       renderAccueil();
       renderHoraires();
+      syncPrayersToSW(timings);
       showToast('📍 Localisation refusée — horaires de Paris affichés par défaut.');
     } catch {
       $('prayerList').innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-muted)">Impossible de charger les horaires. Vérifiez votre connexion.</p>';
@@ -618,5 +620,31 @@ async function loadPrayerTimes() {
   }
 }
 
+// ── Service Worker registration ───────────────
+
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.register('/sw.js').catch(err => {
+    console.warn('SW registration failed:', err);
+  });
+}
+
+// Send prayer times to SW for background notifications
+function syncPrayersToSW(timings) {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(reg => {
+    const prayers = PRAYER_KEYS.map(key => ({
+      name: PRAYER_META[key].nameFr,
+      nameAr: PRAYER_META[key].nameAr,
+      icon: PRAYER_META[key].icon,
+      timeISO: parseTime(timings[key]).toISOString(),
+    }));
+    reg.active?.postMessage({ type: 'SCHEDULE_PRAYERS', prayers });
+  });
+}
+
 // ── Start ─────────────────────────────────────
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => {
+  registerServiceWorker();
+  init();
+});
