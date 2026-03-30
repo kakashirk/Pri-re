@@ -1,0 +1,634 @@
+/* ═══════════════════════════════════════════════
+   SALATI — Islamic Prayer App — Stylesheet
+   ═══════════════════════════════════════════════ */
+
+/* ── Variables ── */
+:root {
+  --green-dark:   #1a3a2a;
+  --green:        #2d6a4f;
+  --green-mid:    #3a8a63;
+  --green-light:  #52b788;
+  --gold:         #c9a84c;
+  --gold-light:   #e8d07a;
+  --cream:        #faf6ef;
+  --cream-dark:   #f0e8d8;
+  --text:         #1a1a1a;
+  --text-muted:   #6b7280;
+  --white:        #ffffff;
+  --shadow:       0 4px 24px rgba(0,0,0,.12);
+  --radius:       16px;
+  --transition:   .25s ease;
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Typography ── */
+.amiri { font-family: 'Amiri', serif; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--cream-dark); }
+::-webkit-scrollbar-thumb { background: var(--green-light); border-radius: 3px; }
+
+/* ══════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════ */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(26, 58, 42, .95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(201,168,76,.2);
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--gold);
+  font-size: 1.2rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.logo-icon { font-size: 1.5rem; }
+.nav {
+  display: flex;
+  gap: .25rem;
+  flex: 1;
+  justify-content: center;
+}
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,.7);
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  font-weight: 500;
+  padding: .5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.nav-btn:hover { color: var(--white); background: rgba(255,255,255,.08); }
+.nav-btn.active { color: var(--gold); background: rgba(201,168,76,.12); }
+
+.notif-btn {
+  background: rgba(201,168,76,.15);
+  border: 1px solid rgba(201,168,76,.3);
+  color: var(--gold);
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.notif-btn:hover { background: rgba(201,168,76,.25); }
+.notif-btn.active { background: var(--gold); color: var(--green-dark); }
+
+/* ══════════════════════════════════════════════
+   SECTIONS — routing
+   ══════════════════════════════════════════════ */
+.section { display: none; padding-top: 64px; min-height: 100vh; }
+.section.active { display: block; }
+
+/* ══════════════════════════════════════════════
+   HERO (Accueil)
+   ══════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  background: linear-gradient(160deg, var(--green-dark) 0%, #2d6a4f 60%, #1a3a2a 100%);
+  overflow: hidden;
+  padding: 4rem 1.5rem 3rem;
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Geometric Islamic Pattern background */
+.hero-pattern {
+  position: absolute;
+  inset: 0;
+  opacity: .06;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(201,168,76,1) 39px, rgba(201,168,76,1) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(201,168,76,1) 39px, rgba(201,168,76,1) 40px),
+    repeating-linear-gradient(45deg, transparent, transparent 19px, rgba(201,168,76,1) 19px, rgba(201,168,76,1) 20px),
+    repeating-linear-gradient(-45deg, transparent, transparent 19px, rgba(201,168,76,1) 19px, rgba(201,168,76,1) 20px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 680px;
+  width: 100%;
+}
+
+.bismillah {
+  font-size: 2rem;
+  color: var(--gold-light);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  direction: rtl;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 300;
+  color: var(--white);
+  letter-spacing: .02em;
+  margin-bottom: .5rem;
+}
+
+.hero-location {
+  color: rgba(255,255,255,.6);
+  font-size: .95rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Next prayer card */
+.next-prayer-card {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(201,168,76,.3);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(8px);
+}
+.next-label {
+  font-size: .8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--gold);
+  margin-bottom: .5rem;
+}
+.next-name {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: .25rem;
+}
+.next-time {
+  font-size: 3.5rem;
+  font-weight: 300;
+  color: var(--gold-light);
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+.next-countdown {
+  font-size: .95rem;
+  color: rgba(255,255,255,.7);
+  background: rgba(0,0,0,.2);
+  display: inline-block;
+  padding: .35rem 1rem;
+  border-radius: 20px;
+}
+
+/* Today's prayers row */
+.today-prayers {
+  display: flex;
+  gap: .75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.today-prayer-item {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: .75rem 1.25rem;
+  min-width: 90px;
+  text-align: center;
+  transition: var(--transition);
+}
+.today-prayer-item.current {
+  background: rgba(201,168,76,.2);
+  border-color: var(--gold);
+}
+.today-prayer-item.passed { opacity: .45; }
+.tp-name {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--gold);
+  margin-bottom: .25rem;
+}
+.tp-time { font-size: 1rem; color: var(--white); }
+
+/* ══════════════════════════════════════════════
+   PAGE CONTAINER (shared)
+   ══════════════════════════════════════════════ */
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+.page-header { margin-bottom: 2rem; text-align: center; }
+.page-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: .35rem;
+}
+.page-sub { color: var(--text-muted); font-size: .95rem; }
+
+/* ══════════════════════════════════════════════
+   HORAIRES section
+   ══════════════════════════════════════════════ */
+.location-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  background: var(--white);
+  border: 1px solid var(--cream-dark);
+  border-radius: 12px;
+  padding: .75rem 1rem;
+  margin-bottom: 1.5rem;
+  font-size: .9rem;
+  color: var(--text-muted);
+}
+.refresh-btn {
+  margin-left: auto;
+  background: var(--green);
+  color: var(--white);
+  border: none;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+}
+.refresh-btn:hover { background: var(--green-mid); }
+
+.prayer-list { display: flex; flex-direction: column; gap: .75rem; margin-bottom: 2rem; }
+
+.prayer-item {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  border-left: 4px solid transparent;
+  transition: var(--transition);
+}
+.prayer-item:hover { transform: translateX(4px); }
+.prayer-item.current {
+  border-left-color: var(--gold);
+  background: linear-gradient(90deg, rgba(201,168,76,.06), var(--white));
+}
+.prayer-item.passed { opacity: .55; }
+
+.pi-icon {
+  width: 44px; height: 44px;
+  background: var(--cream);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.prayer-item.current .pi-icon { background: rgba(201,168,76,.15); }
+
+.pi-info { flex: 1; }
+.pi-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+.pi-arabic {
+  font-family: 'Amiri', serif;
+  font-size: .95rem;
+  color: var(--text-muted);
+  direction: rtl;
+}
+.pi-time {
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--green);
+}
+.prayer-item.current .pi-time { color: var(--gold); font-weight: 600; }
+
+.pi-badge {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  padding: .2rem .6rem;
+  border-radius: 20px;
+  background: rgba(201,168,76,.15);
+  color: var(--gold);
+}
+
+.adhan-info {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  border-left: 4px solid var(--green-light);
+}
+.adhan-info h3 { font-size: .95rem; color: var(--green-dark); margin-bottom: .35rem; }
+.adhan-info p { font-size: .85rem; color: var(--text-muted); }
+
+/* ══════════════════════════════════════════════
+   SOURATES section
+   ══════════════════════════════════════════════ */
+.prayer-tabs {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ptab {
+  padding: .5rem 1.25rem;
+  border: 2px solid var(--cream-dark);
+  background: var(--white);
+  border-radius: 40px;
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.ptab:hover { border-color: var(--green-light); color: var(--green); }
+.ptab.active { border-color: var(--green); background: var(--green); color: var(--white); }
+
+.suratas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.surata-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: inherit;
+}
+.surata-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
+  border-color: var(--green-light);
+}
+.sc-number {
+  width: 36px; height: 36px;
+  background: var(--green);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 700;
+  margin-bottom: .75rem;
+}
+.sc-name-fr { font-weight: 600; font-size: 1rem; color: var(--green-dark); }
+.sc-name-ar {
+  font-family: 'Amiri', serif;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  direction: rtl;
+  margin: .25rem 0;
+}
+.sc-desc { font-size: .8rem; color: var(--text-muted); margin-top: .5rem; }
+
+/* Reader (Sourates / Coran) */
+.surata-reader, .quran-reader {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.reader-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: var(--green-dark);
+  color: var(--white);
+}
+.back-btn {
+  background: rgba(255,255,255,.1);
+  border: none;
+  color: var(--white);
+  padding: .4rem .9rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: .85rem;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.back-btn:hover { background: rgba(255,255,255,.2); }
+.reader-title h3 { font-size: 1.1rem; }
+.reader-arabic { font-size: 1.3rem; direction: rtl; color: var(--gold); }
+
+.reader-content { padding: 1.5rem; }
+
+.ayah-item {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--cream-dark);
+}
+.ayah-item:last-child { border-bottom: none; }
+
+.ayah-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--white);
+  font-size: .78rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.ayah-arabic {
+  font-family: 'Amiri', serif;
+  font-size: 1.6rem;
+  line-height: 2;
+  direction: rtl;
+  text-align: right;
+  color: var(--green-dark);
+}
+
+.ayah-french {
+  font-size: .9rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ══════════════════════════════════════════════
+   CORAN section
+   ══════════════════════════════════════════════ */
+.quran-search {
+  margin-bottom: 1.5rem;
+}
+.quran-search input {
+  width: 100%;
+  padding: .9rem 1.25rem;
+  border: 2px solid var(--cream-dark);
+  border-radius: var(--radius);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  background: var(--white);
+  color: var(--text);
+  transition: var(--transition);
+  outline: none;
+}
+.quran-search input:focus { border-color: var(--green-light); }
+
+.surah-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: .75rem;
+  margin-bottom: 2rem;
+}
+
+.surah-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  border: 1px solid transparent;
+}
+.surah-card:hover {
+  border-color: var(--green-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.sh-num {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  color: var(--white);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.sh-info { flex: 1; min-width: 0; }
+.sh-name-fr { font-size: .95rem; font-weight: 600; color: var(--green-dark); }
+.sh-meta { font-size: .78rem; color: var(--text-muted); }
+.sh-name-ar {
+  font-family: 'Amiri', serif;
+  font-size: 1.15rem;
+  color: var(--green);
+  direction: rtl;
+}
+
+.ayah-container { padding: 1.5rem; }
+
+.surah-basmala {
+  text-align: center;
+  font-family: 'Amiri', serif;
+  font-size: 2rem;
+  color: var(--green-dark);
+  direction: rtl;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--cream-dark);
+  margin-bottom: 1rem;
+}
+
+/* ══════════════════════════════════════════════
+   LOADING SPINNER
+   ══════════════════════════════════════════════ */
+.loading-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--cream-dark);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  margin: 3rem auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--green-dark);
+  color: var(--white);
+  padding: .75rem 1.5rem;
+  border-radius: 40px;
+  font-size: .9rem;
+  box-shadow: var(--shadow);
+  transition: transform .3s ease;
+  z-index: 999;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .hero-title { font-size: 1.8rem; }
+  .next-time { font-size: 2.8rem; }
+  .bismillah { font-size: 1.5rem; }
+  .nav-btn { font-size: .8rem; padding: .4rem .7rem; }
+  .header-inner { gap: .75rem; }
+  .logo-text { display: none; }
+  .today-prayers { gap: .5rem; }
+  .today-prayer-item { min-width: 70px; padding: .6rem .9rem; }
+  .prayer-item { padding: 1rem; }
+  .suratas-grid { grid-template-columns: 1fr; }
+  .surah-list { grid-template-columns: 1fr; }
+  .ayah-arabic { font-size: 1.35rem; }
+}
+
+@media (max-width: 400px) {
+  .nav { gap: 0; }
+  .nav-btn { padding: .35rem .5rem; font-size: .75rem; }
+}
