@@ -74,6 +74,9 @@ async function initAuth() {
     }
   });
 
+  // Failsafe timeout
+  startAuthTimeout();
+
   // Get existing session on load
   try {
     const { data: { session } } = await sb.auth.getSession();
@@ -224,6 +227,15 @@ function updateHeaderUser() {
   if (adminNavBtn) {
     adminNavBtn.style.display = profile?.role === 'admin' ? 'inline-flex' : 'none';
   }
+}
+
+// Failsafe: if auth doesn't resolve in 4s, show overlay
+function startAuthTimeout() {
+  setTimeout(() => {
+    const overlay = document.getElementById('authOverlay');
+    if (overlay && overlay.style.display !== 'none') return; // already handled
+    if (!authState.user) showAuthOverlay('login');
+  }, 4000);
 }
 
 // ═══════════════════════════════════════════════
