@@ -109,6 +109,10 @@ body {
 /* ══════════════════════════════════════════════
    SECTIONS — routing
    ══════════════════════════════════════════════ */
+/* App content hidden until auth confirmed */
+.app-hidden .section,
+.app-hidden .header { visibility: hidden; pointer-events: none; }
+
 .section { display: none; padding-top: 64px; min-height: 100vh; }
 .section.active { display: block; }
 

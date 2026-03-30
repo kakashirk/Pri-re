@@ -35,7 +35,10 @@ function onLogout(fn) { _onLogout = fn; }
 // ── Initialise auth listener ──────────────────
 async function initAuth() {
   const sb = getSupabase();
-  if (!sb) return;
+  if (!sb) {
+    showAuthOverlay('login');
+    return;
+  }
 
   // Check config
   if (SUPABASE_URL.includes('REMPLACE') || SUPABASE_ANON_KEY.includes('REMPLACE')) {
@@ -72,8 +75,12 @@ async function initAuth() {
   });
 
   // Get existing session on load
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      showAuthOverlay('login');
+    }
+  } catch {
     showAuthOverlay('login');
   }
 }
@@ -162,6 +169,7 @@ function hideAuthOverlay() {
   if (!overlay) return;
   overlay.style.display = 'none';
   document.body.style.overflow = '';
+  document.body.classList.remove('app-hidden');
 }
 
 function switchAuthTab(tab) {
