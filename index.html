@@ -12,9 +12,89 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
-<body>
+<body class="app-hidden">
 
-<!-- ───── HEADER ───── -->
+<!-- ═════════════════════════════════════════════
+     AUTH OVERLAY
+     ═════════════════════════════════════════════ -->
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-modal">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <span class="auth-logo-icon">☽</span>
+      <span class="auth-logo-text">Salati</span>
+    </div>
+    <p class="auth-tagline amiri">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Connexion</button>
+      <button class="auth-tab" data-tab="register">Inscription</button>
+    </div>
+
+    <!-- Error -->
+    <div class="auth-error" id="authError" style="display:none"></div>
+
+    <!-- Login form -->
+    <form id="loginForm" style="display:flex;flex-direction:column;gap:.9rem">
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="votre@email.com" required autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="auth-submit">Se connecter</button>
+    </form>
+
+    <!-- Register form -->
+    <form id="registerForm" style="display:none;flex-direction:column;gap:.9rem">
+      <div class="auth-field">
+        <label>Prénom / Nom</label>
+        <input type="text" id="registerName" placeholder="Votre nom" required />
+      </div>
+      <div class="auth-field">
+        <label>Email</label>
+        <input type="email" id="registerEmail" placeholder="votre@email.com" required autocomplete="email" />
+      </div>
+      <div class="auth-field">
+        <label>Mot de passe</label>
+        <input type="password" id="registerPassword" placeholder="Min. 6 caractères" required autocomplete="new-password" />
+      </div>
+      <div class="auth-field">
+        <label>Confirmer le mot de passe</label>
+        <input type="password" id="registerConfirm" placeholder="Répéter le mot de passe" required autocomplete="new-password" />
+      </div>
+      <button type="submit" class="auth-submit">Créer mon compte</button>
+    </form>
+
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════
+     TOKEN MODAL
+     ═════════════════════════════════════════════ -->
+<div class="modal-overlay" id="tokenModal" style="display:none">
+  <div class="token-modal">
+    <div class="tm-header">
+      <h3>🔑 Access Token JWT</h3>
+      <button class="tm-close" id="closeTokenModal">✕</button>
+    </div>
+    <p class="tm-expiry" id="tokenExpiry"></p>
+    <div class="tm-token" id="tokenValue"></div>
+    <div class="tm-actions">
+      <button class="token-btn" id="copyTokenBtn">📋 Copier</button>
+      <button class="token-btn secondary" id="refreshTokenBtn">🔄 Renouveler</button>
+    </div>
+    <p class="tm-warning">⚠️ Ne partagez jamais ce token — il donne accès à votre compte.</p>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════════
+     HEADER
+     ═════════════════════════════════════════════ -->
 <header class="header" id="header">
   <div class="header-inner">
     <div class="logo">
@@ -26,14 +106,36 @@
       <button class="nav-btn" data-section="horaires">Horaires</button>
       <button class="nav-btn" data-section="sourates">Sourates</button>
       <button class="nav-btn" data-section="coran">Coran</button>
+      <button class="nav-btn admin-nav" data-section="admin" style="display:none">⚙️ Admin</button>
     </nav>
-    <button class="notif-btn" id="notifBtn" title="Activer les notifications">
-      <span class="notif-icon">🔔</span>
-    </button>
+    <div class="header-right">
+      <button class="notif-btn" id="notifBtn" title="Activer les notifications">
+        <span class="notif-icon">🔔</span>
+      </button>
+      <!-- User menu -->
+      <div class="user-menu" id="userMenuBtn" style="display:none">
+        <div class="user-avatar">
+          <span class="user-initials">?</span>
+        </div>
+        <div class="user-info">
+          <span class="user-name">—</span>
+          <span class="user-role">—</span>
+        </div>
+        <span class="user-chevron">▾</span>
+      </div>
+      <!-- Dropdown -->
+      <div class="user-dropdown" id="userDropdown">
+        <button id="showTokenBtn" class="dropdown-item">🔑 Mon token</button>
+        <div class="dropdown-divider"></div>
+        <button id="logoutBtn" class="dropdown-item danger">🚪 Déconnexion</button>
+      </div>
+    </div>
   </div>
 </header>
 
-<!-- ───── SECTION ACCUEIL ───── -->
+<!-- ═════════════════════════════════════════════
+     SECTION ACCUEIL
+     ═════════════════════════════════════════════ -->
 <section class="section active" id="accueil">
   <div class="hero">
     <div class="hero-pattern"></div>
@@ -41,16 +143,12 @@
       <p class="bismillah amiri">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
       <h1 class="hero-title">Horaires de Prière</h1>
       <p class="hero-location" id="heroLocation">Localisation en cours…</p>
-
-      <!-- Prochaine prière -->
       <div class="next-prayer-card" id="nextPrayerCard">
         <div class="next-label">Prochaine prière</div>
         <div class="next-name" id="nextPrayerName">—</div>
         <div class="next-time" id="nextPrayerTime">—</div>
         <div class="next-countdown" id="nextCountdown">—</div>
       </div>
-
-      <!-- Prières du jour (résumé) -->
       <div class="today-prayers" id="todayPrayers">
         <div class="loading-spinner"></div>
       </div>
@@ -58,24 +156,23 @@
   </div>
 </section>
 
-<!-- ───── SECTION HORAIRES ───── -->
+<!-- ═════════════════════════════════════════════
+     SECTION HORAIRES
+     ═════════════════════════════════════════════ -->
 <section class="section" id="horaires">
   <div class="page-container">
     <div class="page-header">
       <h2>Horaires du jour</h2>
       <p class="page-sub" id="horairesDate">—</p>
     </div>
-
     <div class="location-bar">
       <span class="loc-icon">📍</span>
       <span id="horairesLocation">Localisation en cours…</span>
       <button class="refresh-btn" id="refreshBtn" title="Actualiser">↻</button>
     </div>
-
     <div class="prayer-list" id="prayerList">
       <div class="loading-spinner"></div>
     </div>
-
     <div class="adhan-info">
       <h3>Méthode de calcul</h3>
       <p>Calcul basé sur la méthode de l'Union des organisations islamiques de France (UOIF / MWL).</p>
@@ -83,14 +180,15 @@
   </div>
 </section>
 
-<!-- ───── SECTION SOURATES ───── -->
+<!-- ═════════════════════════════════════════════
+     SECTION SOURATES
+     ═════════════════════════════════════════════ -->
 <section class="section" id="sourates">
   <div class="page-container">
     <div class="page-header">
       <h2>Sourates recommandées</h2>
       <p class="page-sub">Sourates à réciter selon les moments de prière</p>
     </div>
-
     <div class="prayer-tabs" id="prayerTabs">
       <button class="ptab active" data-prayer="fajr">Fajr</button>
       <button class="ptab" data-prayer="dhuhr">Dhuhr</button>
@@ -98,12 +196,9 @@
       <button class="ptab" data-prayer="maghrib">Maghrib</button>
       <button class="ptab" data-prayer="isha">Isha</button>
     </div>
-
     <div class="suratas-grid" id="suratasGrid">
       <div class="loading-spinner"></div>
     </div>
-
-    <!-- Lecteur de sourate -->
     <div class="surata-reader" id="surataReader" style="display:none">
       <div class="reader-header">
         <button class="back-btn" id="backBtn">← Retour</button>
@@ -119,23 +214,21 @@
   </div>
 </section>
 
-<!-- ───── SECTION CORAN ───── -->
+<!-- ═════════════════════════════════════════════
+     SECTION CORAN
+     ═════════════════════════════════════════════ -->
 <section class="section" id="coran">
   <div class="page-container">
     <div class="page-header">
       <h2>Le Saint Coran</h2>
       <p class="page-sub">Arabe · Traduction française</p>
     </div>
-
     <div class="quran-search">
       <input type="search" id="surahSearch" placeholder="Rechercher une sourate…" />
     </div>
-
     <div class="surah-list" id="surahList">
       <div class="loading-spinner"></div>
     </div>
-
-    <!-- Lecteur Coran -->
     <div class="quran-reader" id="quranReader" style="display:none">
       <div class="reader-header">
         <button class="back-btn" id="quranBackBtn">← Retour</button>
@@ -151,9 +244,68 @@
   </div>
 </section>
 
+<!-- ═════════════════════════════════════════════
+     SECTION ADMIN
+     ═════════════════════════════════════════════ -->
+<section class="section" id="admin">
+  <div class="page-container admin-container">
+
+    <div class="page-header">
+      <h2>⚙️ Panel Admin</h2>
+      <p class="page-sub">Gestion des utilisateurs et des accès</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">—</div>
+        <div class="stat-label">Utilisateurs</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-number" id="statAdmins">—</div>
+        <div class="stat-label">Admins</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-number" id="statBanned">—</div>
+        <div class="stat-label">Bannis</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-number" id="statRecent">—</div>
+        <div class="stat-label">Cette semaine</div>
+      </div>
+    </div>
+
+    <!-- Token info -->
+    <div class="admin-card">
+      <div class="admin-card-title">🔐 Session & Token</div>
+      <div id="adminTokenInfo"><div class="loading-spinner"></div></div>
+    </div>
+
+    <!-- User management -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">👥 Gestion des utilisateurs</div>
+        <input type="search" id="adminSearch" class="admin-search" placeholder="Filtrer…" />
+      </div>
+      <div id="adminContent">
+        <div class="loading-spinner"></div>
+      </div>
+      <div class="admin-user-list" id="adminUserList"></div>
+    </div>
+
+  </div>
+</section>
+
 <!-- ───── TOAST ───── -->
 <div class="toast" id="toast"></div>
 
+<!-- ═════════════════════════════════════════════
+     SCRIPTS
+     ═════════════════════════════════════════════ -->
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="admin.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

@@ -141,6 +141,17 @@ function initNav() {
   });
 }
 
+// Helper to switch to a nav section programmatically
+function navigateTo(section) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector(`.nav-btn[data-section="${section}"]`);
+  if (btn) btn.classList.add('active');
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById(section);
+  if (sec) sec.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
 // ── Geolocation ───────────────────────────────
 
 function getLocation() {
@@ -646,5 +657,31 @@ function syncPrayersToSW(timings) {
 // ── Start ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
-  init();
+
+  // Bind auth forms immediately (before session check)
+  bindAuthForms();
+  bindTokenModal();
+
+  // Hook auth callbacks — app boots only after successful login
+  onLogin(async () => {
+    await init();
+    // Admin section
+    const adminNavBtn = document.querySelector('.nav-btn[data-section="admin"]');
+    if (adminNavBtn) {
+      adminNavBtn.addEventListener('click', () => {
+        loadAdminPanel();
+        renderTokenPanel();
+        initAdminSearch();
+      });
+    }
+  });
+
+  onLogout(() => {
+    // Clear countdown and notif intervals when logged out
+    clearInterval(state.countdownInterval);
+    clearInterval(state.notifCheckInterval);
+  });
+
+  // Start auth (will show overlay if not logged in)
+  initAuth();
 });
