@@ -73,6 +73,7 @@ body {
   gap: .25rem;
   flex: 1;
   justify-content: center;
+  overflow: hidden;
 }
 .nav-btn {
   background: transparent;
@@ -767,6 +768,7 @@ body {
   align-items: center;
   gap: .5rem;
   position: relative;
+  flex-shrink: 0;
 }
 
 .user-menu {
