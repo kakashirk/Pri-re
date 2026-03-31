@@ -672,6 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAdminPanel();
         renderTokenPanel();
         initAdminSearch();
+        bindGenerateToken();
       });
     }
   });

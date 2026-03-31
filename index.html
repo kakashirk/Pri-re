@@ -39,8 +39,8 @@
     <!-- Login form -->
     <form id="loginForm" style="display:flex;flex-direction:column;gap:.9rem">
       <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="loginEmail" placeholder="votre@email.com" required autocomplete="email" />
+        <label>Nom d'utilisateur</label>
+        <input type="text" id="loginUsername" placeholder="votre_nom" required autocomplete="username" />
       </div>
       <div class="auth-field">
         <label>Mot de passe</label>
@@ -53,11 +53,7 @@
     <form id="registerForm" style="display:none;flex-direction:column;gap:.9rem">
       <div class="auth-field">
         <label>Prénom / Nom</label>
-        <input type="text" id="registerName" placeholder="Votre nom" required />
-      </div>
-      <div class="auth-field">
-        <label>Email</label>
-        <input type="email" id="registerEmail" placeholder="votre@email.com" required autocomplete="email" />
+        <input type="text" id="registerName" placeholder="Votre nom" required autocomplete="name" />
       </div>
       <div class="auth-field">
         <label>Mot de passe</label>
@@ -66,6 +62,12 @@
       <div class="auth-field">
         <label>Confirmer le mot de passe</label>
         <input type="password" id="registerConfirm" placeholder="Répéter le mot de passe" required autocomplete="new-password" />
+      </div>
+      <div class="auth-field">
+        <label>Token d'invitation</label>
+        <input type="text" id="registerToken" placeholder="SALA-XXXX-XXXX" autocomplete="off"
+          style="font-family:monospace;letter-spacing:.05em;text-transform:uppercase" />
+        <span style="font-size:.75rem;color:var(--text-muted)">Fourni par l'administrateur · Laissez vide si vous êtes le premier compte</span>
       </div>
       <button type="submit" class="auth-submit">Créer mon compte</button>
     </form>
@@ -270,8 +272,8 @@
         <div class="stat-label">Bannis</div>
       </div>
       <div class="stat-card blue">
-        <div class="stat-number" id="statRecent">—</div>
-        <div class="stat-label">Cette semaine</div>
+        <div class="stat-number" id="statTokens">—</div>
+        <div class="stat-label">Tokens dispo</div>
       </div>
     </div>
 
@@ -279,6 +281,17 @@
     <div class="admin-card">
       <div class="admin-card-title">🔐 Session & Token</div>
       <div id="adminTokenInfo"><div class="loading-spinner"></div></div>
+    </div>
+
+    <!-- Token management -->
+    <div class="admin-card">
+      <div class="admin-card-header">
+        <div class="admin-card-title">🎟️ Tokens d'invitation</div>
+        <button id="generateTokenBtn" class="btn-generate">+ Générer un token</button>
+      </div>
+      <div class="token-list" id="tokenList">
+        <div class="loading-spinner"></div>
+      </div>
     </div>
 
     <!-- User management -->
