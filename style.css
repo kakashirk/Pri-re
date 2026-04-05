@@ -15,9 +15,12 @@
   --text:         #1a1a1a;
   --text-muted:   #6b7280;
   --white:        #ffffff;
-  --shadow:       0 4px 24px rgba(0,0,0,.12);
-  --radius:       16px;
-  --transition:   .25s ease;
+  --shadow:       0 2px 8px rgba(0,0,0,.08), 0 8px 32px rgba(0,0,0,.1);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.07);
+  --radius:       18px;
+  --transition:   .22s ease;
+  --nav-bottom-h: 64px;
+  --safe-bottom:  env(safe-area-inset-bottom, 0px);
 }
 
 /* ── Reset ── */
@@ -123,7 +126,8 @@ body {
    ══════════════════════════════════════════════ */
 /* App content hidden until auth confirmed */
 .app-hidden .section,
-.app-hidden .header { visibility: hidden; pointer-events: none; }
+.app-hidden .header,
+.app-hidden .bottom-nav { visibility: hidden; pointer-events: none; }
 
 .section { display: none; padding-top: 64px; min-height: 100vh; }
 .section.active { display: block; }
@@ -163,7 +167,7 @@ body {
 }
 
 .bismillah {
-  font-size: 2rem;
+  font-size: clamp(1.4rem, 5.5vw, 2rem);
   color: var(--gold-light);
   margin-bottom: 1.5rem;
   line-height: 1.6;
@@ -171,7 +175,7 @@ body {
 }
 
 .hero-title {
-  font-size: 2.5rem;
+  font-size: clamp(1.7rem, 6vw, 2.5rem);
   font-weight: 300;
   color: var(--white);
   letter-spacing: .02em;
@@ -208,7 +212,7 @@ body {
   margin-bottom: .25rem;
 }
 .next-time {
-  font-size: 3.5rem;
+  font-size: clamp(2.6rem, 9vw, 3.5rem);
   font-weight: 300;
   color: var(--gold-light);
   line-height: 1;
@@ -216,8 +220,9 @@ body {
 }
 .next-countdown {
   font-size: .95rem;
-  color: rgba(255,255,255,.7);
-  background: rgba(0,0,0,.2);
+  color: var(--gold-light);
+  background: rgba(201,168,76,.12);
+  border: 1px solid rgba(201,168,76,.25);
   display: inline-block;
   padding: .35rem 1rem;
   border-radius: 20px;
@@ -269,6 +274,15 @@ body {
   color: var(--green-dark);
   margin-bottom: .35rem;
 }
+.page-header h2::before {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  margin: 0 auto .75rem;
+}
 .page-sub { color: var(--text-muted); font-size: .95rem; }
 
 /* ══════════════════════════════════════════════
@@ -311,11 +325,11 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-sm);
   border-left: 4px solid transparent;
   transition: var(--transition);
 }
-.prayer-item:hover { transform: translateX(4px); }
+.prayer-item:hover { transform: translateX(3px); box-shadow: var(--shadow); }
 .prayer-item.current {
   border-left-color: var(--gold);
   background: linear-gradient(90deg, rgba(201,168,76,.06), var(--white));
@@ -476,7 +490,7 @@ body {
   padding: 1.25rem;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-sm);
   border: 1px solid transparent;
   text-decoration: none;
   color: inherit;
@@ -616,7 +630,7 @@ body {
   gap: 1rem;
   cursor: pointer;
   transition: var(--transition);
-  box-shadow: 0 1px 4px rgba(0,0,0,.05);
+  box-shadow: var(--shadow-sm);
   border: 1px solid transparent;
 }
 .surah-card:hover {
@@ -677,55 +691,153 @@ body {
    ══════════════════════════════════════════════ */
 .toast {
   position: fixed;
-  bottom: 2rem;
-  left: 50%;
-  transform: translateX(-50%) translateY(120%);
-  background: var(--green-dark);
+  bottom: calc(var(--nav-bottom-h) + .75rem + var(--safe-bottom));
+  left: 1rem;
+  right: 1rem;
+  transform: translateY(160%);
+  background: rgba(26,58,42,.97);
   color: var(--white);
-  padding: .75rem 1.5rem;
-  border-radius: 40px;
+  padding: .8rem 1.25rem;
+  border-radius: 16px;
   font-size: .9rem;
-  box-shadow: var(--shadow);
-  transition: transform .3s ease;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  border: 1px solid rgba(201,168,76,.2);
+  transition: transform .35s cubic-bezier(.34,1.4,.64,1);
   z-index: 999;
-  white-space: nowrap;
+  max-width: 480px;
+  margin: 0 auto;
 }
-.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.show { transform: translateY(0); }
+
+@media (min-width: 601px) {
+  .toast {
+    left: 50%;
+    right: auto;
+    width: max-content;
+    max-width: 440px;
+    transform: translateX(-50%) translateY(160%);
+    bottom: 2rem;
+    border-radius: 40px;
+    white-space: normal;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+}
 
 /* ══════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════ */
 @media (max-width: 600px) {
-  .hero-title { font-size: 1.8rem; }
-  .next-time { font-size: 2.8rem; }
-  .bismillah { font-size: 1.5rem; }
-  .logo-text { display: none; }
-  .hamburger-btn { display: block; }
-  .nav {
-    display: none;
-    position: absolute;
-    top: 64px;
-    left: 0; right: 0;
-    background: rgba(26,58,42,.98);
-    flex-direction: column;
-    padding: .5rem;
-    gap: .25rem;
-    border-bottom: 1px solid rgba(201,168,76,.2);
-    z-index: 99;
+  /* Typography already handled via clamp() above */
+
+  /* Header: hide hamburger + nav, keep logo + right actions */
+  .hamburger-btn { display: none !important; }
+  .nav { display: none !important; }
+  .logo-text { display: block; }
+
+  /* Section layout: space for fixed header + bottom nav */
+  .section {
+    padding-top: 64px;
+    padding-bottom: calc(var(--nav-bottom-h) + var(--safe-bottom) + 1rem);
   }
-  .nav.open { display: flex; }
-  .nav-btn { font-size: .95rem; padding: .7rem 1rem; text-align: left; }
+  .hero {
+    min-height: calc(100svh - 64px - var(--nav-bottom-h) - var(--safe-bottom));
+    padding: 2.5rem 1.25rem 2rem;
+  }
+
   .today-prayers { gap: .5rem; }
-  .today-prayer-item { min-width: 70px; padding: .6rem .9rem; }
-  .prayer-item { padding: 1rem; }
+  .today-prayer-item { min-width: 72px; padding: .65rem .85rem; }
+  .prayer-item { padding: 1rem 1.1rem; }
   .suratas-grid { grid-template-columns: 1fr; }
   .surah-list { grid-template-columns: 1fr; }
   .ayah-arabic { font-size: 1.35rem; }
+
+  /* Readers: full-screen overlay feel */
+  .surata-reader,
+  .quran-reader {
+    border-radius: 0;
+  }
 }
 
-@media (max-width: 400px) {
-  .nav { gap: 0; }
-  .nav-btn { padding: .35rem .5rem; font-size: .75rem; }
+/* ══════════════════════════════════════════════
+   BOTTOM NAV (mobile only)
+   ══════════════════════════════════════════════ */
+.bottom-nav { display: none; }
+
+@media (max-width: 600px) {
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(22,48,34,.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(201,168,76,.15);
+    padding-bottom: var(--safe-bottom);
+    height: calc(var(--nav-bottom-h) + var(--safe-bottom));
+  }
+
+  .bn-item {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: .5rem .25rem;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,.45);
+    font-family: 'Inter', sans-serif;
+    font-size: .62rem;
+    font-weight: 500;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: color .2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .bn-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+    display: block;
+  }
+
+  .bn-item.active {
+    color: var(--gold);
+  }
+
+  .bn-item.active .bn-icon {
+    transform: translateY(-2px) scale(1.1);
+  }
+
+  .bn-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: calc(.3rem + var(--safe-bottom));
+    width: 18px;
+    height: 2px;
+    background: var(--gold);
+    border-radius: 1px;
+  }
+}
+
+/* Touch feedback on all interactive cards */
+@media (hover: none) {
+  .prayer-item:active,
+  .surata-card:active,
+  .surah-card:active,
+  .mosque-card:active {
+    transform: scale(.97);
+    opacity: .8;
+    transition: transform .1s ease, opacity .1s ease;
+  }
 }
 
 /* ══════════════════════════════════════════════

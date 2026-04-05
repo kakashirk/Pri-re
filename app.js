@@ -128,28 +128,26 @@ function showToast(msg, duration = 3000) {
 
 // ── Navigation ────────────────────────────────
 
+function switchSection(target) {
+  // Sync both top nav and bottom nav
+  document.querySelectorAll('.nav-btn, .bn-item').forEach(b => {
+    b.classList.toggle('active', b.dataset.section === target);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById(target);
+  if (sec) sec.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
 function initNav() {
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const target = btn.dataset.section;
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      $(target).classList.add('active');
-      window.scrollTo(0, 0);
-    });
+  document.querySelectorAll('.nav-btn, .bn-item').forEach(btn => {
+    btn.addEventListener('click', () => switchSection(btn.dataset.section));
   });
 }
 
 // Helper to switch to a nav section programmatically
 function navigateTo(section) {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  const btn = document.querySelector(`.nav-btn[data-section="${section}"]`);
-  if (btn) btn.classList.add('active');
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  const sec = document.getElementById(section);
-  if (sec) sec.classList.add('active');
-  window.scrollTo(0, 0);
+  switchSection(section);
 }
 
 // ── Geolocation ───────────────────────────────
