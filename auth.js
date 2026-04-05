@@ -90,16 +90,21 @@ async function initAuth() {
 async function loadProfile(userId) {
   const sb = getSupabase();
 
-  // Role via SECURITY DEFINER (bypasses RLS — toujours fiable)
-  const { data: role } = await sb.rpc('get_my_role');
+  // 1. Role depuis le JWT app_metadata (le plus fiable, aucune requête DB)
+  const appRole = authState.session?.user?.app_metadata?.role;
 
-  // Full profile data
-  const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
+  // 2. Role depuis RPC SECURITY DEFINER
+  const { data: rpcRole } = await sb.rpc('get_my_role');
+
+  // 3. Profil complet depuis la table
+  const { data } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+
+  const role = appRole || rpcRole || data?.role || 'user';
 
   if (data) {
-    authState.profile = { ...data, role: role || data.role };
+    authState.profile = { ...data, role };
   } else {
-    authState.profile = { id: userId, role: role || 'user' };
+    authState.profile = { id: userId, role, display_name: authState.session?.user?.user_metadata?.display_name };
   }
 }
 
