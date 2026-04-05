@@ -256,10 +256,6 @@ function renderTokenPanel() {
         <div class="ti-value"><span class="role-badge role-${role}">${roleName(role)}</span></div>
       </div>
       <div class="ti-item">
-        <div class="ti-label">Session expire</div>
-        <div class="ti-value">${diffMin > 0 ? `dans ${diffMin} min` : 'bientôt'}</div>
-      </div>
-      <div class="ti-item">
         <div class="ti-label">Access Token (JWT)</div>
         <div class="ti-value ti-mono ti-truncate">${token.substring(0, 40)}…</div>
       </div>
