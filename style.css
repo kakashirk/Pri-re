@@ -68,17 +68,23 @@ body {
   flex-shrink: 0;
 }
 .logo-icon { font-size: 1.5rem; }
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: .3rem .6rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
 .nav {
   display: flex;
   gap: .25rem;
   flex: 1;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scroll-snap-type: x proximity;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  justify-content: center;
 }
-.nav::-webkit-scrollbar { display: none; }
 .nav-btn {
   background: transparent;
   border: none;
@@ -91,8 +97,6 @@ body {
   cursor: pointer;
   transition: var(--transition);
   white-space: nowrap;
-  flex-shrink: 0;
-  scroll-snap-align: start;
 }
 .nav-btn:hover { color: var(--white); background: rgba(255,255,255,.08); }
 .nav-btn.active { color: var(--gold); background: rgba(201,168,76,.12); }
@@ -630,21 +634,21 @@ body {
   .next-time { font-size: 2.8rem; }
   .bismillah { font-size: 1.5rem; }
   .logo-text { display: none; }
-  .header-inner {
-    flex-wrap: wrap;
-    height: auto;
-    padding: .4rem 1rem .2rem;
-    gap: .25rem;
-  }
-  .logo { order: 1; }
-  .header-right { order: 2; margin-left: auto; }
+  .hamburger-btn { display: block; }
   .nav {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: flex-start;
-    padding-bottom: .3rem;
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0; right: 0;
+    background: rgba(26,58,42,.98);
+    flex-direction: column;
+    padding: .5rem;
+    gap: .25rem;
+    border-bottom: 1px solid rgba(201,168,76,.2);
+    z-index: 99;
   }
-  .nav-btn { font-size: .82rem; padding: .35rem .75rem; }
+  .nav.open { display: flex; }
+  .nav-btn { font-size: .95rem; padding: .7rem 1rem; text-align: left; }
   .today-prayers { gap: .5rem; }
   .today-prayer-item { min-width: 70px; padding: .6rem .9rem; }
   .prayer-item { padding: 1rem; }

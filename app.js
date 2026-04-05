@@ -658,6 +658,18 @@ function syncPrayersToSW(timings) {
 document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
 
+  // Hamburger menu toggle
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mainNav = document.getElementById('mainNav');
+  if (hamburgerBtn && mainNav) {
+    hamburgerBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      mainNav.classList.toggle('open');
+    });
+    document.addEventListener('click', () => mainNav.classList.remove('open'));
+    mainNav.addEventListener('click', () => mainNav.classList.remove('open'));
+  }
+
   // Bind auth forms immediately (before session check)
   bindAuthForms();
   bindTokenModal();
