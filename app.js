@@ -254,11 +254,15 @@ async function loadMosques() {
         } catch {}
       }
       if (!data) continue;
-      mosques = data.elements.map(el => {
-        const mLat = el.lat ?? el.center?.lat;
-        const mLon = el.lon ?? el.center?.lon;
-        return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist: haversineKm(lat, lon, mLat, mLon), lat: mLat, lon: mLon };
-      }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
+      mosques = data.elements
+        .filter(el => (el.lat || el.center?.lat) && (el.lon || el.center?.lon))
+        .map(el => {
+          const mLat = el.lat ?? el.center.lat;
+          const mLon = el.lon ?? el.center.lon;
+          return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist: haversineKm(lat, lon, mLat, mLon), lat: mLat, lon: mLon };
+        })
+        .filter(m => isFinite(m.dist))
+        .sort((a, b) => a.dist - b.dist);
       if (mosques.length > 0) break;
     }
 
@@ -275,7 +279,7 @@ async function loadMosques() {
           <div class="mosque-name">🕌 ${escHtml(m.name)}</div>
           <div class="mosque-dist">${m.dist < 1 ? Math.round(m.dist*1000)+' m' : m.dist.toFixed(1)+' km'}</div>
         </div>
-        <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
+        <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener noreferrer">Itinéraire 🗺️</a>
       </div>`).join('');
   } catch (e) {
     if (e.message === '__GEO_FAILED__') {
@@ -525,13 +529,14 @@ async function fetchSurah(num) {
     if (!res.ok) throw new Error('Erreur API Coran');
     const json = await res.json();
 
+    if (!json.data?.[0]?.ayahs || !json.data?.[1]?.ayahs) throw new Error('Données Coran invalides');
     const arabic = json.data[0].ayahs;
     const french = json.data[1].ayahs;
 
     const combined = arabic.map((a, i) => ({
       number: a.numberInSurah,
       arabic: a.text,
-      french: french[i].text,
+      french: french[i]?.text || '[Traduction non disponible]',
     }));
 
     state.surahsCache[num] = combined;
@@ -549,11 +554,15 @@ function renderAyahs(container, ayahs, surahNum) {
   }
   ayahs.forEach(a => {
     const item = el('div', 'ayah-item');
-    item.innerHTML = `
-      <span class="ayah-number">${a.number}</span>
-      <div class="ayah-arabic amiri">${a.arabic}</div>
-      <div class="ayah-french">${a.french}</div>
-    `;
+    const numSpan = el('span', 'ayah-number');
+    numSpan.textContent = a.number;
+    const arabicDiv = el('div', 'ayah-arabic amiri');
+    arabicDiv.textContent = a.arabic;
+    const frenchDiv = el('div', 'ayah-french');
+    frenchDiv.textContent = a.french;
+    item.appendChild(numSpan);
+    item.appendChild(arabicDiv);
+    item.appendChild(frenchDiv);
     container.appendChild(item);
   });
 }
@@ -693,9 +702,11 @@ async function init() {
     document.querySelector('.quran-search').style.display = 'block';
   });
 
-  // Quran search
+  // Quran search (debounced)
+  let searchTimeout;
   $('surahSearch').addEventListener('input', e => {
-    renderCoranList(e.target.value.trim());
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => renderCoranList(e.target.value.trim()), 250);
   });
 
   // Initial renders
@@ -724,6 +735,11 @@ async function loadPrayerTimes() {
     state.prayerTimes = timings;
     state.cityName = city;
 
+    // Cache last known position for fallback
+    localStorage.setItem('lastLat', lat);
+    localStorage.setItem('lastLon', lon);
+    if (city) localStorage.setItem('lastCity', city);
+
     renderAccueil();
     renderHoraires();
     syncPrayersToSW(timings);
@@ -733,15 +749,18 @@ async function loadPrayerTimes() {
 
   } catch (err) {
     console.error(err);
-    // Fallback: Paris
+    // Fallback: last known position, or Paris if none
+    const lastLat = parseFloat(localStorage.getItem('lastLat') || '48.8566');
+    const lastLon = parseFloat(localStorage.getItem('lastLon') || '2.3522');
+    const lastCity = localStorage.getItem('lastCity') || 'Paris';
     try {
-      const timings = await fetchPrayerTimes(48.8566, 2.3522);
+      const timings = await fetchPrayerTimes(lastLat, lastLon);
       state.prayerTimes = timings;
-      state.cityName = 'Paris (par défaut)';
+      state.cityName = `${lastCity} (dernière position)`;
       renderAccueil();
       renderHoraires();
       syncPrayersToSW(timings);
-      showToast('📍 Localisation refusée — horaires de Paris affichés par défaut.');
+      showToast('📍 Localisation indisponible — dernière position utilisée.');
     } catch {
       $('prayerList').innerHTML = '<p style="text-align:center;padding:2rem;color:var(--text-muted)">Impossible de charger les horaires. Vérifiez votre connexion.</p>';
     }
