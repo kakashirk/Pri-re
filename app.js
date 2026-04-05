@@ -209,42 +209,47 @@ function haversineKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
+async function getMosqueCoords() {
+  const cityInput = document.getElementById('mosqueCity')?.value.trim();
+  if (cityInput) {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityInput)}&format=json&limit=1`);
+    const data = await res.json();
+    if (!data.length) throw new Error('Ville introuvable. Vérifiez le nom.');
+    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name.split(',')[0] };
+  }
+  const pos = await new Promise((res, rej) =>
+    navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
+  );
+  return { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'votre position' };
+}
+
 async function loadMosques() {
   const list = document.getElementById('mosqueList');
   if (!list) return;
   list.innerHTML = '<div class="loading-spinner"></div>';
-
   const locEl = document.getElementById('mosqueesLocation');
+  if (locEl) locEl.textContent = 'Recherche en cours…';
 
   try {
-    const pos = await new Promise((res, rej) =>
-      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
-    );
-    const { latitude: lat, longitude: lon } = pos.coords;
+    const { lat, lon, label } = await getMosqueCoords();
 
-    if (locEl) locEl.textContent = 'Recherche en cours…';
-
-    // Search with increasing radius until we find results
     let mosques = [];
     for (const radius of [5000, 15000, 50000, 100000]) {
       const query = `[out:json][timeout:30];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
       const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
       const data = await res.json();
-
       mosques = data.elements.map(el => {
         const mLat = el.lat ?? el.center?.lat;
         const mLon = el.lon ?? el.center?.lon;
-        const dist = haversineKm(lat, lon, mLat, mLon);
-        return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist, lat: mLat, lon: mLon };
+        return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist: haversineKm(lat, lon, mLat, mLon), lat: mLat, lon: mLon };
       }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
-
       if (mosques.length > 0) break;
     }
 
-    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) trouvée(s) près de vous`;
+    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) près de ${label}`;
 
     if (!mosques.length) {
-      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée autour de vous.</p>';
+      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée autour de cette position.</p>';
       return;
     }
 
@@ -257,7 +262,7 @@ async function loadMosques() {
         <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
       </div>`).join('');
   } catch (e) {
-    list.innerHTML = '<p class="admin-error">Impossible d\'accéder à votre position.</p>';
+    list.innerHTML = `<p class="admin-error">${escHtml(e.message || 'Impossible d\'accéder à votre position.')}</p>`;
   }
 }
 
@@ -630,6 +635,10 @@ async function init() {
       showToast('✅ Méthode mise à jour');
     });
   }
+
+  // Mosquées — refresh button + Enter on city input
+  document.getElementById('mosqueRefreshBtn')?.addEventListener('click', loadMosques);
+  document.getElementById('mosqueCity')?.addEventListener('keydown', e => { if (e.key === 'Enter') loadMosques(); });
 
   // Load mosquées when section is shown
   document.querySelectorAll('.nav-btn').forEach(btn => {

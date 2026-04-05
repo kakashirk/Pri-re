@@ -386,6 +386,22 @@ body {
 .method-select:focus { outline: none; border-color: var(--green-dark); }
 
 /* ── Mosquées ─────────────────────────────── */
+.mosque-search-bar {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.mosque-city-input {
+  flex: 1;
+  padding: .55rem .85rem;
+  border: 1.5px solid var(--green-light);
+  border-radius: 8px;
+  font-size: .9rem;
+  color: var(--text-main);
+  background: var(--white);
+}
+.mosque-city-input:focus { outline: none; border-color: var(--green-dark); }
 .mosque-list { display: flex; flex-direction: column; gap: .75rem; }
 .mosque-card {
   background: var(--white);
