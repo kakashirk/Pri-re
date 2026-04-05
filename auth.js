@@ -89,12 +89,14 @@ async function initAuth() {
 // ── Load profile ──────────────────────────────
 async function loadProfile(userId) {
   const sb = getSupabase();
-  // Try RPC first (bypasses RLS)
-  const { data: rpcData } = await sb.rpc('get_my_profile');
-  if (rpcData) { authState.profile = rpcData; return; }
-  // Fallback to direct query
+
+  // Try direct query
   const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
-  if (data) authState.profile = data;
+  if (data) { authState.profile = data; return; }
+
+  // Fallback: get role via secure RPC
+  const { data: role } = await sb.rpc('get_my_role');
+  authState.profile = { id: userId, role: role || 'user' };
 }
 
 // ── Sign in (username + password) ─────────────
