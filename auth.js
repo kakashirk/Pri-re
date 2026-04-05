@@ -96,11 +96,17 @@ async function signUpWithToken(username, password, inviteToken) {
   const sb = getSupabase();
   const cleanName = username.trim();
   const cleanUser = cleanName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  const token     = inviteToken.toUpperCase().trim();
+  const token     = (inviteToken || '').toUpperCase().trim();
 
-  // Validate token
-  const { data: valid, error: tErr } = await sb.rpc('validate_invite_token', { p_token: token });
-  if (tErr || !valid) throw new Error('Token invalide ou déjà utilisé.');
+  // Check if this is the very first user (admin bootstrap — no token needed)
+  const { data: count } = await sb.rpc('get_profiles_count');
+  const isFirstUser = Number(count) === 0;
+
+  if (!isFirstUser) {
+    if (!token) throw new Error('Token d\'invitation requis pour s\'inscrire.');
+    const { data: valid, error: tErr } = await sb.rpc('validate_invite_token', { p_token: token });
+    if (tErr || !valid) throw new Error('Token invalide ou déjà utilisé.');
+  }
 
   // Check username availability
   const { data: existingEmail } = await sb.rpc('get_email_by_username', { p_username: cleanUser });
@@ -119,8 +125,8 @@ async function signUpWithToken(username, password, inviteToken) {
   });
   if (error) throw error;
 
-  // Mark token as used
-  if (data.user) {
+  // Mark token as used (only for non-first users)
+  if (data.user && token) {
     await sb.rpc('use_invite_token', { p_token: token, p_user_id: data.user.id });
   }
 
