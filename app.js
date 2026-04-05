@@ -217,10 +217,14 @@ async function getMosqueCoords() {
     if (!data.length) throw new Error('Ville introuvable. Vérifiez le nom.');
     return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name.split(',')[0] };
   }
-  const pos = await new Promise((res, rej) =>
-    navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
-  );
-  return { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'votre position' };
+  try {
+    const pos = await new Promise((res, rej) =>
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
+    );
+    return { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'votre position' };
+  } catch {
+    throw new Error('__GEO_FAILED__');
+  }
 }
 
 async function loadMosques() {
@@ -274,7 +278,15 @@ async function loadMosques() {
         <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
       </div>`).join('');
   } catch (e) {
-    list.innerHTML = `<p class="admin-error">${escHtml(e.message || 'Impossible d\'accéder à votre position.')}</p>`;
+    if (e.message === '__GEO_FAILED__') {
+      list.innerHTML = `<div class="mosque-geo-hint">
+        <p>📍 La géolocalisation est bloquée ou indisponible.</p>
+        <p>Tapez le nom de votre ville dans le champ ci-dessus et appuyez sur <strong>↻</strong>.</p>
+      </div>`;
+      if (locEl) locEl.textContent = 'Entrez une ville pour rechercher';
+    } else {
+      list.innerHTML = `<p class="admin-error">${escHtml(e.message)}</p>`;
+    }
   }
 }
 

@@ -403,6 +403,16 @@ body {
 }
 .mosque-city-input:focus { outline: none; border-color: var(--green-dark); }
 .mosque-list { display: flex; flex-direction: column; gap: .75rem; }
+.mosque-geo-hint {
+  background: rgba(201,168,76,.1);
+  border: 1.5px solid rgba(201,168,76,.3);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+.mosque-geo-hint p { margin: 0 0 .5rem; }
+.mosque-geo-hint p:last-child { margin: 0; }
 .mosque-card {
   background: var(--white);
   border-radius: var(--radius);
