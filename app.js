@@ -181,18 +181,113 @@ async function getCityName(lat, lon) {
 
 // ── Prayer Times API ──────────────────────────
 
+function getPrayerMethod() {
+  return localStorage.getItem('prayerMethod') || '12';
+}
+
 async function fetchPrayerTimes(lat, lon) {
   const today = new Date();
   const dd = String(today.getDate()).padStart(2, '0');
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const yyyy = today.getFullYear();
   const dateStr = `${dd}-${mm}-${yyyy}`;
+  const method = getPrayerMethod();
 
-  const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=12`;
+  const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=${method}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur API horaires');
   const json = await res.json();
   return json.data.timings;
+}
+
+// ── Mosque finder ─────────────────────────────
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function getMosqueCoords() {
+  const cityInput = document.getElementById('mosqueCity')?.value.trim();
+  if (cityInput) {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cityInput)}&format=json&limit=1`);
+    const data = await res.json();
+    if (!data.length) throw new Error('Ville introuvable. Vérifiez le nom.');
+    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon), label: data[0].display_name.split(',')[0] };
+  }
+  try {
+    const pos = await new Promise((res, rej) =>
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
+    );
+    return { lat: pos.coords.latitude, lon: pos.coords.longitude, label: 'votre position' };
+  } catch {
+    throw new Error('__GEO_FAILED__');
+  }
+}
+
+async function loadMosques() {
+  const list = document.getElementById('mosqueList');
+  if (!list) return;
+  list.innerHTML = '<div class="loading-spinner"></div>';
+  const locEl = document.getElementById('mosqueesLocation');
+  if (locEl) locEl.textContent = 'Recherche en cours…';
+
+  try {
+    const { lat, lon, label } = await getMosqueCoords();
+
+    const overpassEndpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+    ];
+
+    let mosques = [];
+    for (const radius of [5000, 15000, 50000, 100000]) {
+      const query = `[out:json][timeout:30];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
+      let data = null;
+      for (const endpoint of overpassEndpoints) {
+        try {
+          const res = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`);
+          const text = await res.text();
+          if (!text.trim().startsWith('<')) { data = JSON.parse(text); break; }
+        } catch {}
+      }
+      if (!data) continue;
+      mosques = data.elements.map(el => {
+        const mLat = el.lat ?? el.center?.lat;
+        const mLon = el.lon ?? el.center?.lon;
+        return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist: haversineKm(lat, lon, mLat, mLon), lat: mLat, lon: mLon };
+      }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
+      if (mosques.length > 0) break;
+    }
+
+    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) près de ${label}`;
+
+    if (!mosques.length) {
+      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée autour de cette position.</p>';
+      return;
+    }
+
+    list.innerHTML = mosques.map(m => `
+      <div class="mosque-card">
+        <div class="mosque-info">
+          <div class="mosque-name">🕌 ${escHtml(m.name)}</div>
+          <div class="mosque-dist">${m.dist < 1 ? Math.round(m.dist*1000)+' m' : m.dist.toFixed(1)+' km'}</div>
+        </div>
+        <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
+      </div>`).join('');
+  } catch (e) {
+    if (e.message === '__GEO_FAILED__') {
+      list.innerHTML = `<div class="mosque-geo-hint">
+        <p>📍 La géolocalisation est bloquée ou indisponible.</p>
+        <p>Tapez le nom de votre ville dans le champ ci-dessus et appuyez sur <strong>↻</strong>.</p>
+      </div>`;
+      if (locEl) locEl.textContent = 'Entrez une ville pour rechercher';
+    } else {
+      list.innerHTML = `<p class="admin-error">${escHtml(e.message)}</p>`;
+    }
+  }
 }
 
 // ── Time helpers ──────────────────────────────
@@ -554,6 +649,28 @@ async function init() {
   // Refresh button
   $('refreshBtn').addEventListener('click', () => loadPrayerTimes());
 
+  // Prayer method selector
+  const methodSelect = document.getElementById('methodSelect');
+  if (methodSelect) {
+    methodSelect.value = getPrayerMethod();
+    methodSelect.addEventListener('change', () => {
+      localStorage.setItem('prayerMethod', methodSelect.value);
+      loadPrayerTimes();
+      showToast('✅ Méthode mise à jour');
+    });
+  }
+
+  // Mosquées — refresh button + Enter on city input
+  document.getElementById('mosqueRefreshBtn')?.addEventListener('click', loadMosques);
+  document.getElementById('mosqueCity')?.addEventListener('keydown', e => { if (e.key === 'Enter') loadMosques(); });
+
+  // Mosquées — show hint by default, no auto-search
+  const mosqueList = document.getElementById('mosqueList');
+  if (mosqueList) mosqueList.innerHTML = `<div class="mosque-geo-hint">
+    <p>📍 Appuyez sur <strong>↻</strong> pour détecter votre position automatiquement.</p>
+    <p>Ou tapez le nom de votre ville dans le champ et appuyez sur <strong>↻</strong>.</p>
+  </div>`;
+
   // Sourates tabs
   document.querySelectorAll('.ptab').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -658,6 +775,18 @@ function syncPrayersToSW(timings) {
 document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
 
+  // Hamburger menu toggle
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const mainNav = document.getElementById('mainNav');
+  if (hamburgerBtn && mainNav) {
+    hamburgerBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      mainNav.classList.toggle('open');
+    });
+    document.addEventListener('click', () => mainNav.classList.remove('open'));
+    mainNav.addEventListener('click', () => mainNav.classList.remove('open'));
+  }
+
   // Bind auth forms immediately (before session check)
   bindAuthForms();
   bindTokenModal();
@@ -665,16 +794,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hook auth callbacks — app boots only after successful login
   onLogin(async () => {
     await init();
-    // Admin section
+    // Admin section — nav button + dropdown button (mobile)
+    const openAdmin = () => {
+      navigateTo('admin');
+      loadAdminPanel();
+      renderTokenPanel();
+      initAdminSearch();
+      bindGenerateToken();
+    };
     const adminNavBtn = document.querySelector('.nav-btn[data-section="admin"]');
-    if (adminNavBtn) {
-      adminNavBtn.addEventListener('click', () => {
-        loadAdminPanel();
-        renderTokenPanel();
-        initAdminSearch();
-        bindGenerateToken();
-      });
-    }
+    if (adminNavBtn) adminNavBtn.addEventListener('click', openAdmin);
+    const adminMenuBtn = document.getElementById('adminMenuBtn');
+    if (adminMenuBtn) adminMenuBtn.addEventListener('click', () => {
+      document.getElementById('userDropdown')?.classList.remove('show');
+      openAdmin();
+    });
   });
 
   onLogout(() => {

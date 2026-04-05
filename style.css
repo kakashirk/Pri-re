@@ -68,12 +68,22 @@ body {
   flex-shrink: 0;
 }
 .logo-icon { font-size: 1.5rem; }
+.hamburger-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--white);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: .3rem .6rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
 .nav {
   display: flex;
   gap: .25rem;
   flex: 1;
   justify-content: center;
-  overflow: hidden;
 }
 .nav-btn {
   background: transparent;
@@ -86,6 +96,7 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
 }
 .nav-btn:hover { color: var(--white); background: rgba(255,255,255,.08); }
 .nav-btn.active { color: var(--gold); background: rgba(201,168,76,.12); }
@@ -361,6 +372,72 @@ body {
 }
 .adhan-info h3 { font-size: .95rem; color: var(--green-dark); margin-bottom: .35rem; }
 .adhan-info p { font-size: .85rem; color: var(--text-muted); }
+.method-select {
+  width: 100%;
+  padding: .5rem .75rem;
+  border: 1.5px solid var(--green-light);
+  border-radius: 8px;
+  font-size: .9rem;
+  color: var(--text-main);
+  background: var(--white);
+  cursor: pointer;
+  margin-top: .35rem;
+}
+.method-select:focus { outline: none; border-color: var(--green-dark); }
+
+/* ── Mosquées ─────────────────────────────── */
+.mosque-search-bar {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.mosque-city-input {
+  flex: 1;
+  padding: .55rem .85rem;
+  border: 1.5px solid var(--green-light);
+  border-radius: 8px;
+  font-size: .9rem;
+  color: var(--text-main);
+  background: var(--white);
+}
+.mosque-city-input:focus { outline: none; border-color: var(--green-dark); }
+.mosque-list { display: flex; flex-direction: column; gap: .75rem; }
+.mosque-geo-hint {
+  background: rgba(201,168,76,.1);
+  border: 1.5px solid rgba(201,168,76,.3);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  color: var(--text-main);
+  line-height: 1.6;
+}
+.mosque-geo-hint p { margin: 0 0 .5rem; }
+.mosque-geo-hint p:last-child { margin: 0; }
+.mosque-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--green-light);
+}
+.mosque-info { flex: 1; }
+.mosque-name { font-weight: 600; color: var(--green-dark); margin-bottom: .2rem; }
+.mosque-dist { font-size: .85rem; color: var(--text-muted); }
+.mosque-link {
+  background: var(--green-dark);
+  color: var(--white);
+  padding: .4rem .85rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: .82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mosque-link:hover { background: var(--green-light); }
 
 /* ══════════════════════════════════════════════
    SOURATES section
@@ -622,9 +699,22 @@ body {
   .hero-title { font-size: 1.8rem; }
   .next-time { font-size: 2.8rem; }
   .bismillah { font-size: 1.5rem; }
-  .nav-btn { font-size: .8rem; padding: .4rem .7rem; }
-  .header-inner { gap: .75rem; }
   .logo-text { display: none; }
+  .hamburger-btn { display: block; }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0; right: 0;
+    background: rgba(26,58,42,.98);
+    flex-direction: column;
+    padding: .5rem;
+    gap: .25rem;
+    border-bottom: 1px solid rgba(201,168,76,.2);
+    z-index: 99;
+  }
+  .nav.open { display: flex; }
+  .nav-btn { font-size: .95rem; padding: .7rem 1rem; text-align: left; }
   .today-prayers { gap: .5rem; }
   .today-prayer-item { min-width: 70px; padding: .6rem .9rem; }
   .prayer-item { padding: 1rem; }

@@ -9,6 +9,10 @@
   <meta name="theme-color" content="#1a3a2a" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Salati" />
+  <link rel="apple-touch-icon" href="/icon-192.svg" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="description" content="Horaires de prière islamiques, Coran, mosquées proches" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
 </head>
@@ -103,11 +107,14 @@
       <span class="logo-icon">☽</span>
       <span class="logo-text">Salati</span>
     </div>
-    <nav class="nav">
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger-btn" id="hamburgerBtn">☰</button>
+    <nav class="nav" id="mainNav">
       <button class="nav-btn active" data-section="accueil">Accueil</button>
       <button class="nav-btn" data-section="horaires">Horaires</button>
       <button class="nav-btn" data-section="sourates">Sourates</button>
       <button class="nav-btn" data-section="coran">Coran</button>
+      <button class="nav-btn" data-section="mosquees">🕌 Mosquées</button>
       <button class="nav-btn admin-nav" data-section="admin" style="display:none">⚙️ Admin</button>
     </nav>
     <div class="header-right">
@@ -127,6 +134,8 @@
       </div>
       <!-- Dropdown -->
       <div class="user-dropdown" id="userDropdown">
+        <button id="adminMenuBtn" class="dropdown-item" style="display:none">⚙️ Panel Admin</button>
+        <div id="adminMenuDivider" class="dropdown-divider" style="display:none"></div>
         <button id="showTokenBtn" class="dropdown-item">🔑 Mon token</button>
         <div class="dropdown-divider"></div>
         <button id="logoutBtn" class="dropdown-item danger">🚪 Déconnexion</button>
@@ -177,7 +186,35 @@
     </div>
     <div class="adhan-info">
       <h3>Méthode de calcul</h3>
-      <p>Calcul basé sur la méthode de l'Union des organisations islamiques de France (UOIF / MWL).</p>
+      <select id="methodSelect" class="method-select">
+        <option value="12">UOIF — France</option>
+        <option value="3">MWL — Suisse / Europe (recommandé CH)</option>
+        <option value="2">ISNA — Amérique du Nord</option>
+        <option value="4">Umm Al-Qura — Arabie Saoudite</option>
+        <option value="5">Egyptian — Égypte / Afrique</option>
+        <option value="1">Karachi — Pakistan / Asie du Sud</option>
+        <option value="7">Téhéran — Iran</option>
+        <option value="13">Gulf — Golfe Persique</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════
+     SECTION MOSQUÉES
+     ═════════════════════════════════════════════ -->
+<section class="section" id="mosquees">
+  <div class="page-container">
+    <div class="page-header">
+      <h2>🕌 Mosquées proches</h2>
+      <p class="page-sub" id="mosqueesLocation">Basé sur votre position</p>
+    </div>
+    <div class="mosque-search-bar">
+      <input type="text" id="mosqueCity" class="mosque-city-input" placeholder="Ou entrez une ville manuellement…" />
+      <button class="refresh-btn" id="mosqueRefreshBtn" title="Actualiser">↻</button>
+    </div>
+    <div id="mosqueList" class="mosque-list">
+      <div class="loading-spinner"></div>
     </div>
   </div>
 </section>

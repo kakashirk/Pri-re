@@ -35,46 +35,77 @@ async function initAuth() {
     return;
   }
 
-  startAuthTimeout();
-
-  sb.auth.onAuthStateChange(async (event, session) => {
-    authState.session = session;
-    authState.user    = session?.user ?? null;
-
+  // Check existing session first (handles page refresh)
+  try {
+    const { data: { session } } = await sb.auth.getSession();
     if (session?.user) {
+      authState.session = session;
+      authState.user    = session.user;
       await loadProfile(session.user.id);
-
       if (authState.profile?.role === 'banned') {
         await signOut();
         showAuthError('🚫 Accès suspendu. Contactez l\'administrateur.');
         showAuthOverlay('login');
         return;
       }
-
       hideAuthOverlay();
       updateHeaderUser();
       if (_onLogin) _onLogin(authState);
     } else {
-      authState.profile = null;
       showAuthOverlay('login');
-      updateHeaderUser();
-      if (_onLogout) _onLogout();
     }
-  });
-
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) showAuthOverlay('login');
   } catch {
     showAuthOverlay('login');
   }
+
+  // Listen for future auth changes (login/logout)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user && !authState.user) {
+      authState.session = session;
+      authState.user    = session.user;
+      await loadProfile(session.user.id);
+      if (authState.profile?.role === 'banned') {
+        await signOut();
+        showAuthError('🚫 Accès suspendu. Contactez l\'administrateur.');
+        showAuthOverlay('login');
+        return;
+      }
+      hideAuthOverlay();
+      updateHeaderUser();
+      if (_onLogin) _onLogin(authState);
+    } else if (event === 'SIGNED_OUT') {
+      authState.user    = null;
+      authState.profile = null;
+      authState.session = null;
+      showAuthOverlay('login');
+      updateHeaderUser();
+      if (_onLogout) _onLogout();
+    } else if (event === 'TOKEN_REFRESHED' && session) {
+      authState.session = session;
+    }
+  });
 }
 
 // ── Load profile ──────────────────────────────
 async function loadProfile(userId) {
   const sb = getSupabase();
-  const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
-  if (data) authState.profile = data;
+
+  // 1. Role depuis le JWT app_metadata (le plus fiable, aucune requête DB)
+  const appRole = authState.session?.user?.app_metadata?.role;
+
+  // 2. Role depuis RPC SECURITY DEFINER
+  const { data: rpcRole } = await sb.rpc('get_my_role');
+
+  // 3. Profil complet depuis la table
+  const { data } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+
+  const role = appRole || rpcRole || data?.role || 'user';
+
+  if (data) {
+    authState.profile = { ...data, role };
+  } else {
+    authState.profile = { id: userId, role, display_name: authState.session?.user?.user_metadata?.display_name };
+  }
 }
 
 // ── Sign in (username + password) ─────────────
@@ -229,9 +260,17 @@ function updateHeaderUser() {
       authState.profile?.role === 'admin' ? '👑 Admin' : 'Utilisateur';
   }
 
+  const isAdmin = authState.profile?.role === 'admin';
+
   if (adminBtn) {
-    adminBtn.style.display = authState.profile?.role === 'admin' ? 'inline-flex' : 'none';
+    adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   }
+
+  // Also show admin in dropdown (for mobile)
+  const adminMenuBtn = document.getElementById('adminMenuBtn');
+  const adminMenuDivider = document.getElementById('adminMenuDivider');
+  if (adminMenuBtn) adminMenuBtn.style.display = isAdmin ? 'block' : 'none';
+  if (adminMenuDivider) adminMenuDivider.style.display = isAdmin ? 'block' : 'none';
 }
 
 // ── Bind auth forms ───────────────────────────
@@ -344,12 +383,7 @@ function bindTokenModal() {
   });
 }
 
-// ── Failsafe ──────────────────────────────────
-function startAuthTimeout() {
-  setTimeout(() => {
-    if (!authState.user) showAuthOverlay('login');
-  }, 4000);
-}
+// ── Failsafe (supprimé — géré par getSession) ─
 
 // ── Friendly errors ───────────────────────────
 function getFriendlyError(msg) {
