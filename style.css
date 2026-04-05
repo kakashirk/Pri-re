@@ -72,9 +72,13 @@ body {
   display: flex;
   gap: .25rem;
   flex: 1;
-  justify-content: center;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.nav::-webkit-scrollbar { display: none; }
 .nav-btn {
   background: transparent;
   border: none;
@@ -86,6 +90,9 @@ body {
   border-radius: 8px;
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+  scroll-snap-align: start;
 }
 .nav-btn:hover { color: var(--white); background: rgba(255,255,255,.08); }
 .nav-btn.active { color: var(--gold); background: rgba(201,168,76,.12); }
