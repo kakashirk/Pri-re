@@ -233,11 +233,23 @@ async function loadMosques() {
   try {
     const { lat, lon, label } = await getMosqueCoords();
 
+    const overpassEndpoints = [
+      'https://overpass-api.de/api/interpreter',
+      'https://overpass.kumi.systems/api/interpreter',
+    ];
+
     let mosques = [];
     for (const radius of [5000, 15000, 50000, 100000]) {
       const query = `[out:json][timeout:30];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
-      const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-      const data = await res.json();
+      let data = null;
+      for (const endpoint of overpassEndpoints) {
+        try {
+          const res = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`);
+          const text = await res.text();
+          if (!text.trim().startsWith('<')) { data = JSON.parse(text); break; }
+        } catch {}
+      }
+      if (!data) continue;
       mosques = data.elements.map(el => {
         const mLat = el.lat ?? el.center?.lat;
         const mLon = el.lon ?? el.center?.lon;
