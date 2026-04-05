@@ -90,13 +90,17 @@ async function initAuth() {
 async function loadProfile(userId) {
   const sb = getSupabase();
 
-  // Try direct query
-  const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
-  if (data) { authState.profile = data; return; }
-
-  // Fallback: get role via secure RPC
+  // Role via SECURITY DEFINER (bypasses RLS — toujours fiable)
   const { data: role } = await sb.rpc('get_my_role');
-  authState.profile = { id: userId, role: role || 'user' };
+
+  // Full profile data
+  const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
+
+  if (data) {
+    authState.profile = { ...data, role: role || data.role };
+  } else {
+    authState.profile = { id: userId, role: role || 'user' };
+  }
 }
 
 // ── Sign in (username + password) ─────────────
