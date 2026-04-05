@@ -131,25 +131,33 @@ function buildActionButtons(user) {
     return `<button class="role-action-btn demote" data-action="demote">👤 Rétrograder</button>
             <button class="role-action-btn ban" data-action="ban">🚫 Bannir</button>`;
   if (user.role === 'banned')
-    return `<button class="role-action-btn unban" data-action="unban">✅ Rétablir</button>`;
+    return `<button class="role-action-btn unban" data-action="unban">✅ Rétablir</button>
+            <button class="role-action-btn delete" data-action="delete">🗑️ Supprimer</button>`;
   return '';
 }
 
 async function handleRoleAction(userId, action, row) {
   const roleMap    = { promote: 'admin', demote: 'user', ban: 'banned', unban: 'user' };
-  const newRole    = roleMap[action];
   const confirmMsg = {
     promote: 'Promouvoir en admin ?',
     demote:  'Rétrograder en utilisateur ?',
     ban:     'Bannir cet utilisateur ?',
     unban:   'Rétablir l\'accès ?',
+    delete:  '⚠️ Supprimer définitivement cet utilisateur et toutes ses données ?',
   }[action];
 
   if (!confirm(confirmMsg)) return;
   row.querySelectorAll('.role-action-btn').forEach(b => b.disabled = true);
   try {
-    await updateUserRole(userId, newRole);
-    showToast(`✅ Rôle mis à jour : ${roleName(newRole)}`);
+    if (action === 'delete') {
+      const sb = getSupabase();
+      const { error } = await sb.rpc('admin_delete_user', { p_user_id: userId });
+      if (error) throw error;
+      showToast('✅ Utilisateur supprimé.');
+    } else {
+      await updateUserRole(userId, roleMap[action]);
+      showToast(`✅ Rôle mis à jour : ${roleName(roleMap[action])}`);
+    }
     await loadAdminPanel();
   } catch (err) {
     showToast('❌ ' + err.message);
