@@ -664,14 +664,12 @@ async function init() {
   document.getElementById('mosqueRefreshBtn')?.addEventListener('click', loadMosques);
   document.getElementById('mosqueCity')?.addEventListener('keydown', e => { if (e.key === 'Enter') loadMosques(); });
 
-  // Load mosquées when section is shown
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    if (btn.dataset.section === 'mosquees') {
-      btn.addEventListener('click', () => {
-        if (!document.getElementById('mosqueList').querySelector('.mosque-card')) loadMosques();
-      });
-    }
-  });
+  // Mosquées — show hint by default, no auto-search
+  const mosqueList = document.getElementById('mosqueList');
+  if (mosqueList) mosqueList.innerHTML = `<div class="mosque-geo-hint">
+    <p>📍 Appuyez sur <strong>↻</strong> pour détecter votre position automatiquement.</p>
+    <p>Ou tapez le nom de votre ville dans le champ et appuyez sur <strong>↻</strong>.</p>
+  </div>`;
 
   // Sourates tabs
   document.querySelectorAll('.ptab').forEach(btn => {
