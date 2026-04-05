@@ -35,39 +35,55 @@ async function initAuth() {
     return;
   }
 
-  startAuthTimeout();
-
-  sb.auth.onAuthStateChange(async (event, session) => {
-    authState.session = session;
-    authState.user    = session?.user ?? null;
-
+  // Check existing session first (handles page refresh)
+  try {
+    const { data: { session } } = await sb.auth.getSession();
     if (session?.user) {
+      authState.session = session;
+      authState.user    = session.user;
       await loadProfile(session.user.id);
-
       if (authState.profile?.role === 'banned') {
         await signOut();
         showAuthError('🚫 Accès suspendu. Contactez l\'administrateur.');
         showAuthOverlay('login');
         return;
       }
-
       hideAuthOverlay();
       updateHeaderUser();
       if (_onLogin) _onLogin(authState);
     } else {
-      authState.profile = null;
       showAuthOverlay('login');
-      updateHeaderUser();
-      if (_onLogout) _onLogout();
     }
-  });
-
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) showAuthOverlay('login');
   } catch {
     showAuthOverlay('login');
   }
+
+  // Listen for future auth changes (login/logout)
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session?.user && !authState.user) {
+      authState.session = session;
+      authState.user    = session.user;
+      await loadProfile(session.user.id);
+      if (authState.profile?.role === 'banned') {
+        await signOut();
+        showAuthError('🚫 Accès suspendu. Contactez l\'administrateur.');
+        showAuthOverlay('login');
+        return;
+      }
+      hideAuthOverlay();
+      updateHeaderUser();
+      if (_onLogin) _onLogin(authState);
+    } else if (event === 'SIGNED_OUT') {
+      authState.user    = null;
+      authState.profile = null;
+      authState.session = null;
+      showAuthOverlay('login');
+      updateHeaderUser();
+      if (_onLogout) _onLogout();
+    } else if (event === 'TOKEN_REFRESHED' && session) {
+      authState.session = session;
+    }
+  });
 }
 
 // ── Load profile ──────────────────────────────
@@ -344,12 +360,7 @@ function bindTokenModal() {
   });
 }
 
-// ── Failsafe ──────────────────────────────────
-function startAuthTimeout() {
-  setTimeout(() => {
-    if (!authState.user) showAuthOverlay('login');
-  }, 4000);
-}
+// ── Failsafe (supprimé — géré par getSession) ─
 
 // ── Friendly errors ───────────────────────────
 function getFriendlyError(msg) {
