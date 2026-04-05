@@ -89,6 +89,10 @@ async function initAuth() {
 // ── Load profile ──────────────────────────────
 async function loadProfile(userId) {
   const sb = getSupabase();
+  // Try RPC first (bypasses RLS)
+  const { data: rpcData } = await sb.rpc('get_my_profile');
+  if (rpcData) { authState.profile = rpcData; return; }
+  // Fallback to direct query
   const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
   if (data) authState.profile = data;
 }
