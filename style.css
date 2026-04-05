@@ -737,6 +737,8 @@ body {
   .hamburger-btn { display: none !important; }
   .nav { display: none !important; }
   .logo-text { display: block; }
+  /* Push bell + avatar to the far right on mobile */
+  .header-right { margin-left: auto; }
 
   /* Section layout: space for fixed header + bottom nav */
   .section {
@@ -745,7 +747,8 @@ body {
   }
   .hero {
     min-height: calc(100svh - 64px - var(--nav-bottom-h) - var(--safe-bottom));
-    padding: 2.5rem 1.25rem 2rem;
+    /* Extra bottom padding so last prayer card clears the bottom nav */
+    padding: 2.5rem 1.25rem calc(var(--nav-bottom-h) + var(--safe-bottom) + 2.5rem);
   }
 
   .today-prayers { gap: .5rem; }
