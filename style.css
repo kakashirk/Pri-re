@@ -386,14 +386,6 @@ body {
 .method-select:focus { outline: none; border-color: var(--green-dark); }
 
 /* ── Mosquées ─────────────────────────────── */
-.mosque-radius-bar {
-  display: flex;
-  align-items: center;
-  gap: .75rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
-}
-.mosque-radius-bar label { font-size: .9rem; color: var(--text-muted); }
 .mosque-list { display: flex; flex-direction: column; gap: .75rem; }
 .mosque-card {
   background: var(--white);

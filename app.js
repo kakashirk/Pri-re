@@ -214,31 +214,37 @@ async function loadMosques() {
   if (!list) return;
   list.innerHTML = '<div class="loading-spinner"></div>';
 
+  const locEl = document.getElementById('mosqueesLocation');
+
   try {
     const pos = await new Promise((res, rej) =>
       navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
     );
     const { latitude: lat, longitude: lon } = pos.coords;
-    const radius = (document.getElementById('mosqueRadius')?.value || 5) * 1000;
 
-    const locEl = document.getElementById('mosqueesLocation');
     if (locEl) locEl.textContent = 'Recherche en cours…';
 
-    const query = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
-    const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
-    const data = await res.json();
+    // Search with increasing radius until we find results
+    let mosques = [];
+    for (const radius of [5000, 15000, 50000, 100000]) {
+      const query = `[out:json][timeout:30];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
+      const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+      const data = await res.json();
 
-    const mosques = data.elements.map(el => {
-      const mLat = el.lat ?? el.center?.lat;
-      const mLon = el.lon ?? el.center?.lon;
-      const dist = haversineKm(lat, lon, mLat, mLon);
-      return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist, lat: mLat, lon: mLon, tags: el.tags };
-    }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
+      mosques = data.elements.map(el => {
+        const mLat = el.lat ?? el.center?.lat;
+        const mLon = el.lon ?? el.center?.lon;
+        const dist = haversineKm(lat, lon, mLat, mLon);
+        return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist, lat: mLat, lon: mLon };
+      }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
 
-    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) trouvée(s)`;
+      if (mosques.length > 0) break;
+    }
+
+    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) trouvée(s) près de vous`;
 
     if (!mosques.length) {
-      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée dans ce rayon.</p>';
+      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée autour de vous.</p>';
       return;
     }
 
@@ -246,12 +252,12 @@ async function loadMosques() {
       <div class="mosque-card">
         <div class="mosque-info">
           <div class="mosque-name">🕌 ${escHtml(m.name)}</div>
-          <div class="mosque-dist">${m.dist < 1 ? Math.round(m.dist*1000)+'m' : m.dist.toFixed(1)+'km'}</div>
+          <div class="mosque-dist">${m.dist < 1 ? Math.round(m.dist*1000)+' m' : m.dist.toFixed(1)+' km'}</div>
         </div>
         <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
       </div>`).join('');
   } catch (e) {
-    list.innerHTML = '<p class="admin-error">Impossible d\'accéder à votre position ou à l\'API.</p>';
+    list.innerHTML = '<p class="admin-error">Impossible d\'accéder à votre position.</p>';
   }
 }
 
@@ -625,14 +631,12 @@ async function init() {
     });
   }
 
-  // Mosquées section
-  const mosqueRefreshBtn = document.getElementById('mosqueRefreshBtn');
-  if (mosqueRefreshBtn) mosqueRefreshBtn.addEventListener('click', loadMosques);
-
   // Load mosquées when section is shown
   document.querySelectorAll('.nav-btn').forEach(btn => {
     if (btn.dataset.section === 'mosquees') {
-      btn.addEventListener('click', () => { if (!document.getElementById('mosqueList').querySelector('.mosque-card')) loadMosques(); });
+      btn.addEventListener('click', () => {
+        if (!document.getElementById('mosqueList').querySelector('.mosque-card')) loadMosques();
+      });
     }
   });
 
