@@ -1,8 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    { "src": "**/*", "use": "@vercel/static" }
-  ],
+  "buildCommand": "sed -i \"s/BUILD_TIMESTAMP/$(date +%s)/g\" sw.js",
+  "outputDirectory": ".",
   "routes": [
     { "src": "/(.*)", "dest": "/$1" }
   ]

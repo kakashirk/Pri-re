@@ -3,7 +3,7 @@
    Enables background notifications + PWA caching
    ═══════════════════════════════════════════════ */
 
-const CACHE_NAME = 'salati-v6';
+const CACHE_NAME = 'salati-BUILD_TIMESTAMP';
 const ASSETS = ['/', '/index.html', '/style.css', '/app.js', '/manifest.json'];
 
 // ── Install: cache static assets ──────────────
