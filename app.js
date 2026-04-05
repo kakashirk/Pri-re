@@ -181,18 +181,78 @@ async function getCityName(lat, lon) {
 
 // ── Prayer Times API ──────────────────────────
 
+function getPrayerMethod() {
+  return localStorage.getItem('prayerMethod') || '12';
+}
+
 async function fetchPrayerTimes(lat, lon) {
   const today = new Date();
   const dd = String(today.getDate()).padStart(2, '0');
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const yyyy = today.getFullYear();
   const dateStr = `${dd}-${mm}-${yyyy}`;
+  const method = getPrayerMethod();
 
-  const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=12`;
+  const url = `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lon}&method=${method}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Erreur API horaires');
   const json = await res.json();
   return json.data.timings;
+}
+
+// ── Mosque finder ─────────────────────────────
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+async function loadMosques() {
+  const list = document.getElementById('mosqueList');
+  if (!list) return;
+  list.innerHTML = '<div class="loading-spinner"></div>';
+
+  try {
+    const pos = await new Promise((res, rej) =>
+      navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000 })
+    );
+    const { latitude: lat, longitude: lon } = pos.coords;
+    const radius = (document.getElementById('mosqueRadius')?.value || 5) * 1000;
+
+    const locEl = document.getElementById('mosqueesLocation');
+    if (locEl) locEl.textContent = 'Recherche en cours…';
+
+    const query = `[out:json][timeout:25];(node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon});way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${lat},${lon}););out body center;`;
+    const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`);
+    const data = await res.json();
+
+    const mosques = data.elements.map(el => {
+      const mLat = el.lat ?? el.center?.lat;
+      const mLon = el.lon ?? el.center?.lon;
+      const dist = haversineKm(lat, lon, mLat, mLon);
+      return { name: el.tags?.name || el.tags?.['name:fr'] || 'Mosquée', dist, lat: mLat, lon: mLon, tags: el.tags };
+    }).filter(m => m.lat).sort((a, b) => a.dist - b.dist);
+
+    if (locEl) locEl.textContent = `${mosques.length} mosquée(s) trouvée(s)`;
+
+    if (!mosques.length) {
+      list.innerHTML = '<p class="admin-empty">Aucune mosquée trouvée dans ce rayon.</p>';
+      return;
+    }
+
+    list.innerHTML = mosques.map(m => `
+      <div class="mosque-card">
+        <div class="mosque-info">
+          <div class="mosque-name">🕌 ${escHtml(m.name)}</div>
+          <div class="mosque-dist">${m.dist < 1 ? Math.round(m.dist*1000)+'m' : m.dist.toFixed(1)+'km'}</div>
+        </div>
+        <a class="mosque-link" href="https://www.google.com/maps/dir/?api=1&destination=${m.lat},${m.lon}" target="_blank" rel="noopener">Itinéraire 🗺️</a>
+      </div>`).join('');
+  } catch (e) {
+    list.innerHTML = '<p class="admin-error">Impossible d\'accéder à votre position ou à l\'API.</p>';
+  }
 }
 
 // ── Time helpers ──────────────────────────────
@@ -553,6 +613,28 @@ async function init() {
 
   // Refresh button
   $('refreshBtn').addEventListener('click', () => loadPrayerTimes());
+
+  // Prayer method selector
+  const methodSelect = document.getElementById('methodSelect');
+  if (methodSelect) {
+    methodSelect.value = getPrayerMethod();
+    methodSelect.addEventListener('change', () => {
+      localStorage.setItem('prayerMethod', methodSelect.value);
+      loadPrayerTimes();
+      showToast('✅ Méthode mise à jour');
+    });
+  }
+
+  // Mosquées section
+  const mosqueRefreshBtn = document.getElementById('mosqueRefreshBtn');
+  if (mosqueRefreshBtn) mosqueRefreshBtn.addEventListener('click', loadMosques);
+
+  // Load mosquées when section is shown
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    if (btn.dataset.section === 'mosquees') {
+      btn.addEventListener('click', () => { if (!document.getElementById('mosqueList').querySelector('.mosque-card')) loadMosques(); });
+    }
+  });
 
   // Sourates tabs
   document.querySelectorAll('.ptab').forEach(btn => {

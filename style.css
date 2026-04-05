@@ -372,6 +372,54 @@ body {
 }
 .adhan-info h3 { font-size: .95rem; color: var(--green-dark); margin-bottom: .35rem; }
 .adhan-info p { font-size: .85rem; color: var(--text-muted); }
+.method-select {
+  width: 100%;
+  padding: .5rem .75rem;
+  border: 1.5px solid var(--green-light);
+  border-radius: 8px;
+  font-size: .9rem;
+  color: var(--text-main);
+  background: var(--white);
+  cursor: pointer;
+  margin-top: .35rem;
+}
+.method-select:focus { outline: none; border-color: var(--green-dark); }
+
+/* ── Mosquées ─────────────────────────────── */
+.mosque-radius-bar {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.mosque-radius-bar label { font-size: .9rem; color: var(--text-muted); }
+.mosque-list { display: flex; flex-direction: column; gap: .75rem; }
+.mosque-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--green-light);
+}
+.mosque-info { flex: 1; }
+.mosque-name { font-weight: 600; color: var(--green-dark); margin-bottom: .2rem; }
+.mosque-dist { font-size: .85rem; color: var(--text-muted); }
+.mosque-link {
+  background: var(--green-dark);
+  color: var(--white);
+  padding: .4rem .85rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: .82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.mosque-link:hover { background: var(--green-light); }
 
 /* ══════════════════════════════════════════════
    SOURATES section

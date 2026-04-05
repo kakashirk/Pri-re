@@ -110,6 +110,7 @@
       <button class="nav-btn" data-section="horaires">Horaires</button>
       <button class="nav-btn" data-section="sourates">Sourates</button>
       <button class="nav-btn" data-section="coran">Coran</button>
+      <button class="nav-btn" data-section="mosquees">🕌 Mosquées</button>
       <button class="nav-btn admin-nav" data-section="admin" style="display:none">⚙️ Admin</button>
     </nav>
     <div class="header-right">
@@ -181,7 +182,41 @@
     </div>
     <div class="adhan-info">
       <h3>Méthode de calcul</h3>
-      <p>Calcul basé sur la méthode de l'Union des organisations islamiques de France (UOIF / MWL).</p>
+      <select id="methodSelect" class="method-select">
+        <option value="12">UOIF — France (défaut)</option>
+        <option value="3">MWL — Europe / Monde musulman</option>
+        <option value="2">ISNA — Amérique du Nord</option>
+        <option value="4">Umm Al-Qura — Arabie Saoudite</option>
+        <option value="5">Egyptian — Égypte / Afrique</option>
+        <option value="1">Karachi — Pakistan / Asie du Sud</option>
+        <option value="7">Téhéran — Iran</option>
+        <option value="13">Gulf — Golfe Persique</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- ═════════════════════════════════════════════
+     SECTION MOSQUÉES
+     ═════════════════════════════════════════════ -->
+<section class="section" id="mosquees">
+  <div class="page-container">
+    <div class="page-header">
+      <h2>🕌 Mosquées proches</h2>
+      <p class="page-sub" id="mosqueesLocation">Basé sur votre position</p>
+    </div>
+    <div class="mosque-radius-bar">
+      <label for="mosqueRadius">Rayon :</label>
+      <select id="mosqueRadius" class="method-select" style="width:auto">
+        <option value="2">2 km</option>
+        <option value="5" selected>5 km</option>
+        <option value="10">10 km</option>
+        <option value="20">20 km</option>
+      </select>
+      <button class="refresh-btn" id="mosqueRefreshBtn">↻ Rechercher</button>
+    </div>
+    <div id="mosqueList" class="mosque-list">
+      <div class="loading-spinner"></div>
     </div>
   </div>
 </section>
