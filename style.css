@@ -629,9 +629,22 @@ body {
   .hero-title { font-size: 1.8rem; }
   .next-time { font-size: 2.8rem; }
   .bismillah { font-size: 1.5rem; }
-  .nav-btn { font-size: .8rem; padding: .4rem .7rem; }
-  .header-inner { gap: .75rem; }
   .logo-text { display: none; }
+  .header-inner {
+    flex-wrap: wrap;
+    height: auto;
+    padding: .4rem 1rem .2rem;
+    gap: .25rem;
+  }
+  .logo { order: 1; }
+  .header-right { order: 2; margin-left: auto; }
+  .nav {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    padding-bottom: .3rem;
+  }
+  .nav-btn { font-size: .82rem; padding: .35rem .75rem; }
   .today-prayers { gap: .5rem; }
   .today-prayer-item { min-width: 70px; padding: .6rem .9rem; }
   .prayer-item { padding: 1rem; }
