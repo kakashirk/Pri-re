@@ -260,9 +260,17 @@ function updateHeaderUser() {
       authState.profile?.role === 'admin' ? '👑 Admin' : 'Utilisateur';
   }
 
+  const isAdmin = authState.profile?.role === 'admin';
+
   if (adminBtn) {
-    adminBtn.style.display = authState.profile?.role === 'admin' ? 'inline-flex' : 'none';
+    adminBtn.style.display = isAdmin ? 'inline-flex' : 'none';
   }
+
+  // Also show admin in dropdown (for mobile)
+  const adminMenuBtn = document.getElementById('adminMenuBtn');
+  const adminMenuDivider = document.getElementById('adminMenuDivider');
+  if (adminMenuBtn) adminMenuBtn.style.display = isAdmin ? 'block' : 'none';
+  if (adminMenuDivider) adminMenuDivider.style.display = isAdmin ? 'block' : 'none';
 }
 
 // ── Bind auth forms ───────────────────────────

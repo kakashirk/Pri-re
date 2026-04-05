@@ -665,16 +665,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // Hook auth callbacks — app boots only after successful login
   onLogin(async () => {
     await init();
-    // Admin section
+    // Admin section — nav button + dropdown button (mobile)
+    const openAdmin = () => {
+      navigateTo('admin');
+      loadAdminPanel();
+      renderTokenPanel();
+      initAdminSearch();
+      bindGenerateToken();
+    };
     const adminNavBtn = document.querySelector('.nav-btn[data-section="admin"]');
-    if (adminNavBtn) {
-      adminNavBtn.addEventListener('click', () => {
-        loadAdminPanel();
-        renderTokenPanel();
-        initAdminSearch();
-        bindGenerateToken();
-      });
-    }
+    if (adminNavBtn) adminNavBtn.addEventListener('click', openAdmin);
+    const adminMenuBtn = document.getElementById('adminMenuBtn');
+    if (adminMenuBtn) adminMenuBtn.addEventListener('click', () => {
+      document.getElementById('userDropdown')?.classList.remove('show');
+      openAdmin();
+    });
   });
 
   onLogout(() => {
