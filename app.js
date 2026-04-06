@@ -107,6 +107,86 @@ const state = {
   surahsCache: {},
 };
 
+// ── Audio Player ──────────────────────────────
+
+const ap = {
+  audio: null,
+  ayahs: [],
+  idx: 0,
+  get playing() { return this.audio && !this.audio.paused; },
+};
+
+function apInit() {
+  if (ap.audio) return;
+  ap.audio = new Audio();
+  ap.audio.addEventListener('ended', () => {
+    const next = ap.idx + 1;
+    if (next < ap.ayahs.length) apPlay(next);
+    else apUpdateUI();
+  });
+  ap.audio.addEventListener('play',  apUpdateUI);
+  ap.audio.addEventListener('pause', apUpdateUI);
+}
+
+function apPlay(idx) {
+  apInit();
+  ap.idx = idx;
+  const ayah = ap.ayahs[idx];
+  if (!ayah) return;
+  ap.audio.src = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayah.globalNumber}.mp3`;
+  ap.audio.play().catch(() => showToast('Erreur de lecture audio'));
+  apHighlight(idx);
+  apUpdateUI();
+  apMediaSession(ayah);
+}
+
+function apToggle() {
+  apInit();
+  if (ap.playing) ap.audio.pause();
+  else if (ap.audio.src) ap.audio.play().catch(() => {});
+  else apPlay(ap.idx);
+}
+
+function apUpdateUI() {
+  const btn = document.getElementById('apPlayBtn');
+  if (btn) btn.textContent = ap.playing ? '⏸' : '▶';
+  const info = document.getElementById('apInfo');
+  const ayah = ap.ayahs[ap.idx];
+  if (info && ayah) info.textContent = `Verset ${ayah.number} / ${ap.ayahs.length}`;
+  // Update per-ayah buttons
+  document.querySelectorAll('.ayah-play-btn').forEach((b, i) => {
+    b.textContent = (i === ap.idx && ap.playing) ? '⏸' : '▶';
+  });
+}
+
+function apHighlight(idx) {
+  document.querySelectorAll('.ayah-item').forEach((item, i) => {
+    item.classList.toggle('ayah-playing', i === idx);
+  });
+  const current = document.querySelectorAll('.ayah-item')[idx];
+  if (current) current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function apStop() {
+  if (ap.audio) { ap.audio.pause(); ap.audio.src = ''; }
+  document.querySelectorAll('.ayah-item').forEach(item => item.classList.remove('ayah-playing'));
+  document.querySelectorAll('.ayah-play-btn').forEach(b => b.textContent = '▶');
+}
+
+function apMediaSession(ayah) {
+  if (!('mediaSession' in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: `Verset ${ayah.number}`,
+    artist: 'Mishary Rashid Alafasy',
+    album: 'Saint Coran — Salati',
+    artwork: [{ src: '/icon-192.svg', sizes: '192x192', type: 'image/svg+xml' }],
+  });
+  navigator.mediaSession.setActionHandler('play',          () => ap.audio?.play());
+  navigator.mediaSession.setActionHandler('pause',         () => ap.audio?.pause());
+  navigator.mediaSession.setActionHandler('previoustrack', () => ap.idx > 0 && apPlay(ap.idx - 1));
+  navigator.mediaSession.setActionHandler('nexttrack',     () => ap.idx < ap.ayahs.length - 1 && apPlay(ap.idx + 1));
+}
+
 // ── DOM helpers ───────────────────────────────
 
 const $ = id => document.getElementById(id);
@@ -533,10 +613,11 @@ async function fetchSurah(num) {
     const phonetic = json.data[2].ayahs;
 
     const combined = arabic.map((a, i) => ({
-      number:   a.numberInSurah,
-      arabic:   a.text,
-      phonetic: phonetic[i]?.text || '',
-      french:   french[i]?.text  || '[Traduction non disponible]',
+      number:       a.numberInSurah,
+      globalNumber: a.number,          // global ayah number (1–6236) for audio URL
+      arabic:       a.text,
+      phonetic:     phonetic[i]?.text  || '',
+      french:       french[i]?.text    || '[Traduction non disponible]',
     }));
 
     state.surahsCache[num] = combined;
@@ -552,11 +633,42 @@ function renderAyahs(container, ayahs, surahNum) {
     container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem">Impossible de charger les versets.</p>';
     return;
   }
-  ayahs.forEach(a => {
+
+  // ── Audio player bar ─────────────────────────
+  ap.ayahs = ayahs;
+  ap.idx = 0;
+  apStop();
+
+  const playerBar = el('div', 'audio-player-bar');
+  playerBar.innerHTML = `
+    <div class="ap-controls">
+      <button class="ap-btn" id="apPrevBtn" title="Verset précédent">⏮</button>
+      <button class="ap-btn ap-play" id="apPlayBtn" title="Lecture / Pause">▶</button>
+      <button class="ap-btn" id="apNextBtn" title="Verset suivant">⏭</button>
+    </div>
+    <div class="ap-info">
+      <span id="apInfo">Verset 1 / ${ayahs.length}</span>
+      <span class="ap-reciter">🎙 Alafasy</span>
+    </div>`;
+  container.appendChild(playerBar);
+
+  document.getElementById('apPrevBtn').addEventListener('click', () => ap.idx > 0 && apPlay(ap.idx - 1));
+  document.getElementById('apPlayBtn').addEventListener('click', apToggle);
+  document.getElementById('apNextBtn').addEventListener('click', () => ap.idx < ap.ayahs.length - 1 && apPlay(ap.idx + 1));
+
+  // ── Ayah items ───────────────────────────────
+  ayahs.forEach((a, i) => {
     const item = el('div', 'ayah-item');
 
+    const header = el('div', 'ayah-header');
     const numSpan = el('span', 'ayah-number');
     numSpan.textContent = a.number;
+    const playBtn = el('button', 'ayah-play-btn');
+    playBtn.textContent = '▶';
+    playBtn.title = 'Écouter ce verset';
+    playBtn.addEventListener('click', () => apPlay(i));
+    header.appendChild(numSpan);
+    header.appendChild(playBtn);
 
     const arabicDiv = el('div', 'ayah-arabic amiri');
     arabicDiv.textContent = a.arabic;
@@ -567,7 +679,7 @@ function renderAyahs(container, ayahs, surahNum) {
     const frenchDiv = el('div', 'ayah-french');
     frenchDiv.textContent = a.french;
 
-    item.appendChild(numSpan);
+    item.appendChild(header);
     item.appendChild(arabicDiv);
     item.appendChild(phoneticDiv);
     item.appendChild(frenchDiv);
@@ -697,14 +809,16 @@ async function init() {
     });
   });
 
-  // Back buttons
+  // Back buttons — stop audio on exit
   $('backBtn').addEventListener('click', () => {
+    apStop();
     $('surataReader').style.display = 'none';
     $('suratasGrid').style.display = 'grid';
     document.querySelector('.prayer-tabs').style.display = 'flex';
   });
 
   $('quranBackBtn').addEventListener('click', () => {
+    apStop();
     $('quranReader').style.display = 'none';
     $('surahList').style.display = 'grid';
     document.querySelector('.quran-search').style.display = 'block';
