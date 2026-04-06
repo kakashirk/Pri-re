@@ -133,7 +133,9 @@ function apPlay(idx) {
   ap.idx = idx;
   const ayah = ap.ayahs[idx];
   if (!ayah) return;
+  ap.audio.pause();
   ap.audio.src = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${ayah.globalNumber}.mp3`;
+  ap.audio.load();
   ap.audio.play().catch(() => showToast('Erreur de lecture audio'));
   apHighlight(idx);
   apUpdateUI();
@@ -143,7 +145,7 @@ function apPlay(idx) {
 function apToggle() {
   apInit();
   if (ap.playing) ap.audio.pause();
-  else if (ap.audio.src) ap.audio.play().catch(() => {});
+  else if (ap.audio.getAttribute('src')) ap.audio.play().catch(() => {});
   else apPlay(ap.idx);
 }
 
@@ -153,7 +155,6 @@ function apUpdateUI() {
   const info = document.getElementById('apInfo');
   const ayah = ap.ayahs[ap.idx];
   if (info && ayah) info.textContent = `Verset ${ayah.number} / ${ap.ayahs.length}`;
-  // Update per-ayah buttons
   document.querySelectorAll('.ayah-play-btn').forEach((b, i) => {
     b.textContent = (i === ap.idx && ap.playing) ? '⏸' : '▶';
   });
@@ -168,7 +169,11 @@ function apHighlight(idx) {
 }
 
 function apStop() {
-  if (ap.audio) { ap.audio.pause(); ap.audio.src = ''; }
+  if (ap.audio) {
+    ap.audio.pause();
+    ap.audio.removeAttribute('src');
+    ap.audio.load(); // reset to idle — évite le bug src='' → URL de la page
+  }
   document.querySelectorAll('.ayah-item').forEach(item => item.classList.remove('ayah-playing'));
   document.querySelectorAll('.ayah-play-btn').forEach(b => b.textContent = '▶');
 }
