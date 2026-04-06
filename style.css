@@ -747,12 +747,14 @@ body {
   }
   .hero {
     min-height: calc(100svh - 64px - var(--nav-bottom-h) - var(--safe-bottom));
-    /* Extra bottom padding so last prayer card clears the bottom nav */
-    padding: 2.5rem 1.25rem calc(var(--nav-bottom-h) + var(--safe-bottom) + 2.5rem);
+    /* Extra space so the wrapped Isha card clears the bottom nav */
+    padding: 2.5rem 1.25rem calc(var(--nav-bottom-h) + var(--safe-bottom) + 5rem);
   }
 
-  .today-prayers { gap: .5rem; }
-  .today-prayer-item { min-width: 72px; padding: .65rem .85rem; }
+  .today-prayers { gap: .4rem; flex-wrap: nowrap; }
+  .today-prayer-item { min-width: 0; flex: 1; padding: .6rem .4rem; }
+  .tp-name { font-size: .65rem; letter-spacing: .04em; }
+  .tp-time { font-size: .88rem; }
   .prayer-item { padding: 1rem 1.1rem; }
   .suratas-grid { grid-template-columns: 1fr; }
   .surah-list { grid-template-columns: 1fr; }
