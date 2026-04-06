@@ -587,11 +587,21 @@ body {
   color: var(--green-dark);
 }
 
+.ayah-phonetic {
+  font-size: .88rem;
+  line-height: 1.6;
+  color: var(--green-mid);
+  font-style: italic;
+  letter-spacing: .01em;
+}
+
 .ayah-french {
-  font-size: .9rem;
+  font-size: .88rem;
   line-height: 1.7;
   color: var(--text-muted);
   font-style: italic;
+  padding-top: .2rem;
+  border-top: 1px solid var(--cream-dark);
 }
 
 /* ══════════════════════════════════════════════

@@ -520,21 +520,23 @@ async function fetchSurah(num) {
   if (state.surahsCache[num]) return state.surahsCache[num];
 
   try {
-    // Fetch Arabic + French translation in one call
+    // Fetch Arabic + French + phonetic transliteration in one call
     const res = await fetch(
-      `https://api.alquran.cloud/v1/surah/${num}/editions/quran-uthmani,fr.hamidullah`
+      `https://api.alquran.cloud/v1/surah/${num}/editions/quran-uthmani,fr.hamidullah,en.transliteration`
     );
     if (!res.ok) throw new Error('Erreur API Coran');
     const json = await res.json();
 
-    if (!json.data?.[0]?.ayahs || !json.data?.[1]?.ayahs) throw new Error('Données Coran invalides');
+    if (!json.data?.[0]?.ayahs || !json.data?.[1]?.ayahs || !json.data?.[2]?.ayahs) throw new Error('Données Coran invalides');
     const arabic = json.data[0].ayahs;
-    const french = json.data[1].ayahs;
+    const french  = json.data[1].ayahs;
+    const phonetic = json.data[2].ayahs;
 
     const combined = arabic.map((a, i) => ({
-      number: a.numberInSurah,
-      arabic: a.text,
-      french: french[i]?.text || '[Traduction non disponible]',
+      number:   a.numberInSurah,
+      arabic:   a.text,
+      phonetic: phonetic[i]?.text || '',
+      french:   french[i]?.text  || '[Traduction non disponible]',
     }));
 
     state.surahsCache[num] = combined;
@@ -552,14 +554,22 @@ function renderAyahs(container, ayahs, surahNum) {
   }
   ayahs.forEach(a => {
     const item = el('div', 'ayah-item');
+
     const numSpan = el('span', 'ayah-number');
     numSpan.textContent = a.number;
+
     const arabicDiv = el('div', 'ayah-arabic amiri');
     arabicDiv.textContent = a.arabic;
+
+    const phoneticDiv = el('div', 'ayah-phonetic');
+    phoneticDiv.textContent = a.phonetic;
+
     const frenchDiv = el('div', 'ayah-french');
     frenchDiv.textContent = a.french;
+
     item.appendChild(numSpan);
     item.appendChild(arabicDiv);
+    item.appendChild(phoneticDiv);
     item.appendChild(frenchDiv);
     container.appendChild(item);
   });
