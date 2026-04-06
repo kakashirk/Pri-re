@@ -793,9 +793,6 @@ body {
     justify-content: center;
     gap: 3px;
     padding: .5rem .25rem;
-    background: transparent;
-    border: none;
-    border-radius: 0;
     color: rgba(255,255,255,.45);
     font-family: 'Inter', sans-serif;
     font-size: .62rem;
@@ -804,9 +801,7 @@ body {
     cursor: pointer;
     transition: color .2s ease;
     -webkit-tap-highlight-color: transparent;
-    -webkit-appearance: none;
-    appearance: none;
-    outline: none;
+    user-select: none;
   }
 
   .bn-icon {
