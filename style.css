@@ -776,10 +776,8 @@ body {
     position: fixed;
     bottom: 0; left: 0; right: 0;
     z-index: 100;
-    background: rgba(22,48,34,.97);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(201,168,76,.15);
+    background: #162212;
+    border-top: 1px solid rgba(201,168,76,.18);
     padding-bottom: var(--safe-bottom);
     height: calc(var(--nav-bottom-h) + var(--safe-bottom));
   }
