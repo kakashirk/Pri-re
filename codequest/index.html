@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeQuest — Apprends à coder en t'amusant</title>
+  <meta name="description" content="Apprends HTML, CSS, JavaScript, Python, Discord bots et React avec des leçons interactives, quiz et mini-jeux." />
+  <meta name="theme-color" content="#0d1117" />
+
+  <!-- Prism.js syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== SIDEBAR (desktop) ===== -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">Code<span>Quest</span></div>
+    <div class="nav-items">
+      <div class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="learn">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">Apprendre</span>
+      </div>
+      <div class="nav-item" data-page="games">
+        <span class="nav-icon">🎮</span>
+        <span class="nav-label">Mini-Jeux</span>
+      </div>
+      <div class="nav-item" data-page="profile">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profil</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main">
+
+    <!-- DASHBOARD -->
+    <section id="page-dashboard" class="page active">
+      <div class="dash-greeting">
+        <h1>Bonjour 👋</h1>
+        <p>Prêt à coder aujourd'hui?</p>
+      </div>
+
+      <div class="dash-grid">
+        <!-- Streak -->
+        <div class="dash-card">
+          <h3>🔥 Streak</h3>
+          <div class="streak-display">
+            <div class="streak-num" id="streak-count">0</div>
+            <div class="streak-label">jours<br>de suite</div>
+          </div>
+        </div>
+
+        <!-- Level & XP -->
+        <div class="dash-card">
+          <h3>⭐ Niveau</h3>
+          <div class="level-text" id="dash-level">Niv. 1 — Newbie</div>
+          <div class="progress-bar" style="margin-top:10px">
+            <div class="progress-fill" id="dash-xp-bar" style="width:0%"></div>
+          </div>
+          <div class="xp-bar-row">
+            <span class="xp-text" id="dash-xp-text">0 / 100 XP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily goal -->
+      <div class="dash-card" style="margin-bottom:20px">
+        <h3>🎯 Objectif du jour</h3>
+        <div class="daily-goal-text" id="daily-goal-status">Complète 1 leçon aujourd'hui</div>
+        <div class="progress-bar"><div class="progress-fill" id="daily-goal-bar" style="width:0%;background:var(--success)"></div></div>
+      </div>
+
+      <!-- Continue learning -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2>▶️ Continuer</h2>
+          <a href="#" onclick="navigate('learn');return false;">Voir tout →</a>
+        </div>
+        <div id="continue-card" class="continue-card"></div>
+      </div>
+
+      <!-- Tracks progress -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2>📊 Mes parcours</h2>
+        </div>
+        <div id="dash-tracks"></div>
+      </div>
+
+      <!-- Quick games -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2>🎮 Jeux rapides</h2>
+          <a href="#" onclick="navigate('games');return false;">Tous les jeux →</a>
+        </div>
+        <div id="dash-games"></div>
+      </div>
+
+      <!-- Achievements -->
+      <div class="dash-section">
+        <div class="dash-section-header">
+          <h2>🏆 Succès récents</h2>
+          <a href="#" onclick="navigate('profile');return false;">Voir tout →</a>
+        </div>
+        <div id="dash-achievements"></div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section id="page-learn" class="page"></section>
+
+    <!-- LESSON -->
+    <section id="page-lesson" class="page"></section>
+
+    <!-- QUIZ -->
+    <section id="page-quiz" class="page"></section>
+
+    <!-- GAMES LIST -->
+    <section id="page-games" class="page"></section>
+
+    <!-- GAME PLAY -->
+    <section id="page-game" class="page"></section>
+
+    <!-- PROFILE -->
+    <section id="page-profile" class="page"></section>
+
+  </main>
+
+</div>
+
+<!-- ===== BOTTOM NAV (mobile) ===== -->
+<nav id="bottom-nav">
+  <div class="nav-items">
+    <div class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Accueil</span>
+    </div>
+    <div class="nav-item" data-page="learn">
+      <span class="nav-icon">📚</span>
+      <span class="nav-label">Apprendre</span>
+    </div>
+    <div class="nav-item" data-page="games">
+      <span class="nav-icon">🎮</span>
+      <span class="nav-label">Jeux</span>
+    </div>
+    <div class="nav-item" data-page="profile">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profil</span>
+    </div>
+  </div>
+</nav>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/games.js"></script>
+
+</body>
+</html>
