@@ -920,49 +920,5 @@ function syncPrayersToSW(timings) {
 // ── Start ─────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   registerServiceWorker();
-
-  // Hamburger menu toggle
-  const hamburgerBtn = document.getElementById('hamburgerBtn');
-  const mainNav = document.getElementById('mainNav');
-  if (hamburgerBtn && mainNav) {
-    hamburgerBtn.addEventListener('click', e => {
-      e.stopPropagation();
-      mainNav.classList.toggle('open');
-    });
-    document.addEventListener('click', () => mainNav.classList.remove('open'));
-    mainNav.addEventListener('click', () => mainNav.classList.remove('open'));
-  }
-
-  // Bind auth forms immediately (before session check)
-  bindAuthForms();
-  bindTokenModal();
-
-  // Hook auth callbacks — app boots only after successful login
-  onLogin(async () => {
-    await init();
-    // Admin section — nav button + dropdown button (mobile)
-    const openAdmin = () => {
-      navigateTo('admin');
-      loadAdminPanel();
-      renderTokenPanel();
-      initAdminSearch();
-      bindGenerateToken();
-    };
-    const adminNavBtn = document.querySelector('.nav-btn[data-section="admin"]');
-    if (adminNavBtn) adminNavBtn.addEventListener('click', openAdmin);
-    const adminMenuBtn = document.getElementById('adminMenuBtn');
-    if (adminMenuBtn) adminMenuBtn.addEventListener('click', () => {
-      document.getElementById('userDropdown')?.classList.remove('show');
-      openAdmin();
-    });
-  });
-
-  onLogout(() => {
-    // Clear countdown and notif intervals when logged out
-    clearInterval(state.countdownInterval);
-    clearInterval(state.notifCheckInterval);
-  });
-
-  // Start auth (will show overlay if not logged in)
-  initAuth();
+  init();
 });
